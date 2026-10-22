@@ -8,6 +8,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,3 +36,13 @@ jobs:
         with:
           name: doppa-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+      # Ссылка для скачивания прямо на телефон: GitHub → Releases
+      - name: Publish to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk doppa.apk
+          gh release create "apk-${{ github.run_number }}" doppa.apk --prerelease \
+            --target "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --title "Doppa APK #${{ github.run_number }}" \
+            --notes "Тестовая сборка для Android. Откройте doppa.apk на телефоне и разрешите установку из этого источника."
