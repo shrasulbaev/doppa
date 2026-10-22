@@ -34,6 +34,8 @@ npx eas-cli@latest build --platform ios
 
 Для нового проекта: впишите его URL и publishable key в `.env`, примените миграции (`supabase db push`) и выполните `supabase/seed.sql`.
 
+Тестовый вход: пока в `.env` стоит `EXPO_PUBLIC_TEST_AUTH=1`, письма и SMS не отправляются, подходит код `000000`, прогресс хранится на устройстве.
+
 Вход по почте: в Authentication → Email Templates → Magic Link замените ссылку на код `{{ .Token }}`, чтобы письмо приходило с 6 цифрами. Встроенная почта Supabase пишет только адресам участников организации и не чаще пары писем в час; для реальных учеников подключите свой SMTP (Authentication → SMTP Settings). Вход по телефону: Authentication → Providers → Phone, нужен SMS-провайдер, например Twilio.
 
 ## Контент

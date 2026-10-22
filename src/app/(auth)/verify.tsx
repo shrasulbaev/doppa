@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, ProgressBar, T, TopBar, ui } from '@/components/ui';
 import { pullProgress, useStore } from '@/lib/store';
-import { isDemo, supabase } from '@/lib/supabase';
+import { TEST_CODE, supabase, testAuth } from '@/lib/supabase';
 import { fonts } from '@/lib/theme';
 
 const CODE_LENGTH = 6;
@@ -22,7 +22,10 @@ export default function Verify() {
   async function confirm() {
     setError('');
     if (code.length !== CODE_LENGTH) return setError(`Введите все ${CODE_LENGTH} цифр`);
-    if (!supabase) return router.push('/avatar');
+    if (testAuth || !supabase) {
+      if (code !== TEST_CODE) return setError(`В тестовом режиме код: ${TEST_CODE}`);
+      return router.push('/avatar');
+    }
     setBusy(true);
     const { data, error: e } = await supabase.auth.verifyOtp(
       mode === 'phone' ? { phone: to, token: code, type: 'sms' } : { email: to, token: code, type: 'email' },
@@ -38,7 +41,7 @@ export default function Verify() {
   }
 
   async function resend() {
-    if (!supabase) return;
+    if (!supabase || testAuth) return;
     const { error: e } = await supabase.auth.signInWithOtp(mode === 'phone' ? { phone: to } : { email: to });
     setError(e ? `Не получилось отправить код: ${e.message}` : 'Отправили новый код');
   }
@@ -69,8 +72,8 @@ export default function Verify() {
             style={[ui.field, { height: 64, fontSize: 30, fontFamily: fonts.black, letterSpacing: 12, textAlign: 'center' }]}
           />
         </View>
-        {isDemo ? (
-          <T variant="muted" style={{ fontSize: 14 }}>Демо-режим: подойдёт любой код из {CODE_LENGTH} цифр.</T>
+        {testAuth ? (
+          <T variant="muted" style={{ fontSize: 14 }}>Тестовый режим: введите {TEST_CODE}.</T>
         ) : (
           <Text onPress={resend} accessibilityRole="button" style={[ui.label, { color: '#1872B8' }]}>Отправить код ещё раз</Text>
         )}

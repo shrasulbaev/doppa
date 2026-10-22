@@ -20,6 +20,10 @@ export const supabase: SupabaseClient | null =
 
 export const isDemo = supabase === null;
 
+/** Тестовый вход: письма и SMS не отправляются, подходит код 000000. Выключить: убрать EXPO_PUBLIC_TEST_AUTH из .env. */
+export const testAuth = isDemo || process.env.EXPO_PUBLIC_TEST_AUTH === '1';
+export const TEST_CODE = '000000';
+
 /** Публичная ссылка на запись слова в хранилище Supabase (бакет audio). */
 export function audioUrl(file: string | null): string | null {
   if (!url || !file) return null;

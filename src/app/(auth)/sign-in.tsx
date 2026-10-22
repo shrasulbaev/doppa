@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { Bubble, Button, ProgressBar, T, TopBar, ui } from '@/components/ui';
-import { isDemo, supabase } from '@/lib/supabase';
+import { supabase, testAuth } from '@/lib/supabase';
 import { colors, fonts } from '@/lib/theme';
 
 type Mode = 'phone' | 'email';
@@ -31,7 +31,7 @@ export default function SignIn() {
       to = email.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return setError('Проверьте адрес почты');
     }
-    if (supabase) {
+    if (supabase && !testAuth) {
       setBusy(true);
       const { error: e } = await supabase.auth.signInWithOtp(mode === 'phone' ? { phone: to } : { email: to });
       setBusy(false);
@@ -118,9 +118,9 @@ export default function SignIn() {
         <View style={{ flex: 1 }} />
         <View style={{ gap: 12 }}>
           <Button title={busy ? 'Отправляем…' : 'Получить код'} onPress={send} disabled={busy} />
-          {isDemo && (
+          {testAuth && (
             <T variant="muted" style={{ fontSize: 12, textAlign: 'center' }}>
-              Демо-режим: сервер ещё не подключён, код никуда не отправляется.
+              Тестовый режим: код никуда не отправляется, на следующем шаге введите 000000.
             </T>
           )}
         </View>
