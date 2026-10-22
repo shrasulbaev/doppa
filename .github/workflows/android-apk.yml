@@ -1,0 +1,34 @@
+# Собирает APK для установки на Android без магазина.
+# Запуск: вкладка Actions → «Android APK» → Run workflow. Готовый файл — в Artifacts.
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx expo prebuild --platform android --no-install
+        env:
+          EXPO_OFFLINE: 1
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: doppa-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
