@@ -1,88 +1,1037 @@
 {
-  "sections": [
-    { "id": "kashgar", "position": 1, "title": "Раздел 1", "city": "Кашгар" },
-    { "id": "turpan", "position": 2, "title": "Раздел 2", "city": "Турфан" }
-  ],
-  "levels": [
-    { "id": "kashgar-1", "sectionId": "kashgar", "position": 1, "title": "Приветствия", "wordIds": [1, 2, 3, 4, 5, 6] },
-    { "id": "kashgar-2", "sectionId": "kashgar", "position": 2, "title": "Семья", "wordIds": [11, 12, 15, 16, 17, 20] },
-    { "id": "kashgar-3", "sectionId": "kashgar", "position": 3, "title": "Числа", "wordIds": [32, 33, 34, 35, 36, 37] }
-  ],
-  "letters": [
-    { "upper": "А", "arabic": "ئا", "exampleWordId": 9, "uyghur": false },
-    { "upper": "Ә", "arabic": "ئە", "exampleWordId": 26, "uyghur": true },
-    { "upper": "Б", "arabic": "ب", "exampleWordId": 15, "uyghur": false },
-    { "upper": "В", "arabic": "ۋ", "exampleWordId": 153, "uyghur": false },
-    { "upper": "Г", "arabic": "گ", "exampleWordId": 85, "uyghur": false },
-    { "upper": "Ғ", "arabic": "غ", "exampleWordId": 117, "uyghur": true },
-    { "upper": "Д", "arabic": "د", "exampleWordId": 13, "uyghur": false },
-    { "upper": "Е", "arabic": "ئې", "exampleWordId": 66, "uyghur": false },
-    { "upper": "Ж", "arabic": "ژ", "exampleWordId": null, "uyghur": false },
-    { "upper": "Җ", "arabic": "ج", "exampleWordId": 172, "uyghur": true },
-    { "upper": "З", "arabic": "ز", "exampleWordId": null, "uyghur": false },
-    { "upper": "И", "arabic": "ئى", "exampleWordId": 33, "uyghur": false },
-    { "upper": "Й", "arabic": "ي", "exampleWordId": 25, "uyghur": false },
-    { "upper": "К", "arabic": "ك", "exampleWordId": 7, "uyghur": false },
-    { "upper": "Қ", "arabic": "ق", "exampleWordId": 22, "uyghur": true },
-    { "upper": "Л", "arabic": "ل", "exampleWordId": 88, "uyghur": false },
-    { "upper": "М", "arabic": "م", "exampleWordId": 16, "uyghur": false },
-    { "upper": "Н", "arabic": "ن", "exampleWordId": 28, "uyghur": false },
-    { "upper": "Ң", "arabic": "ڭ", "exampleWordId": 20, "uyghur": true },
-    { "upper": "О", "arabic": "ئو", "exampleWordId": 21, "uyghur": false },
-    { "upper": "Ө", "arabic": "ئۆ", "exampleWordId": 99, "uyghur": true },
-    { "upper": "П", "arabic": "پ", "exampleWordId": 75, "uyghur": false },
-    { "upper": "Р", "arabic": "ر", "exampleWordId": 3, "uyghur": false },
-    { "upper": "С", "arabic": "س", "exampleWordId": 1, "uyghur": false },
-    { "upper": "Т", "arabic": "ت", "exampleWordId": 35, "uyghur": false },
-    { "upper": "У", "arabic": "ئۇ", "exampleWordId": 19, "uyghur": false },
-    { "upper": "Ү", "arabic": "ئۈ", "exampleWordId": 34, "uyghur": true },
-    { "upper": "Ф", "arabic": "ف", "exampleWordId": null, "uyghur": false },
-    { "upper": "Х", "arabic": "خ", "exampleWordId": 4, "uyghur": false },
-    { "upper": "Һ", "arabic": "ھ", "exampleWordId": 5, "uyghur": true },
-    { "upper": "Ч", "arabic": "چ", "exampleWordId": 67, "uyghur": false },
-    { "upper": "Ш", "arabic": "ش", "exampleWordId": 94, "uyghur": false },
-    { "upper": "Ю", "arabic": "يۇ", "exampleWordId": 135, "uyghur": false },
-    { "upper": "Я", "arabic": "يا", "exampleWordId": 6, "uyghur": false }
-  ],
-  "stories": [
+ "sections": [
+  {
+   "id": "kashgar",
+   "position": 1,
+   "title": "Раздел 1",
+   "city": "Кашгар"
+  },
+  {
+   "id": "turpan",
+   "position": 2,
+   "title": "Раздел 2",
+   "city": "Турфан"
+  },
+  {
+   "id": "hotan",
+   "position": 3,
+   "title": "Раздел 3",
+   "city": "Хотан"
+  },
+  {
+   "id": "ghulja",
+   "position": 4,
+   "title": "Раздел 4",
+   "city": "Кульджа"
+  },
+  {
+   "id": "aksu",
+   "position": 5,
+   "title": "Раздел 5",
+   "city": "Аксу"
+  },
+  {
+   "id": "urumqi",
+   "position": 6,
+   "title": "Раздел 6",
+   "city": "Урумчи"
+  }
+ ],
+ "levels": [
+  {
+   "id": "kashgar-1",
+   "sectionId": "kashgar",
+   "position": 1,
+   "title": "Приветствия",
+   "wordIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "kashgar-2",
+   "sectionId": "kashgar",
+   "position": 2,
+   "title": "Семья",
+   "wordIds": [
+    11,
+    12,
+    15,
+    16,
+    17,
+    20
+   ]
+  },
+  {
+   "id": "kashgar-3",
+   "sectionId": "kashgar",
+   "position": 3,
+   "title": "Числа",
+   "wordIds": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37
+   ]
+  },
+  {
+   "id": "kashgar-4",
+   "sectionId": "kashgar",
+   "position": 4,
+   "title": "Люди",
+   "wordIds": [
+    9,
+    10,
+    13,
+    14,
+    18,
+    7,
+    8
+   ]
+  },
+  {
+   "id": "kashgar-5",
+   "sectionId": "kashgar",
+   "position": 5,
+   "title": "Числа 2",
+   "wordIds": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ]
+  },
+  {
+   "id": "kashgar-6",
+   "sectionId": "kashgar",
+   "position": 6,
+   "title": "Цвета",
+   "wordIds": [
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59
+   ]
+  },
+  {
+   "id": "kashgar-7",
+   "sectionId": "kashgar",
+   "position": 7,
+   "title": "Еда",
+   "wordIds": [
+    79,
+    80,
+    81,
+    82,
+    83,
+    84
+   ]
+  },
+  {
+   "id": "kashgar-8",
+   "sectionId": "kashgar",
+   "position": 8,
+   "title": "Тело",
+   "wordIds": [
+    60,
+    61,
+    62,
+    63,
+    64,
+    65
+   ]
+  },
+  {
+   "id": "turpan-1",
+   "sectionId": "turpan",
+   "position": 1,
+   "title": "Животные",
+   "wordIds": [
+    105,
+    106,
+    107,
+    108,
+    109
+   ]
+  },
+  {
+   "id": "turpan-2",
+   "sectionId": "turpan",
+   "position": 2,
+   "title": "Вопросы",
+   "wordIds": [
+    212,
+    213,
+    214,
+    215,
+    216,
+    219,
+    218
+   ]
+  },
+  {
+   "id": "turpan-3",
+   "sectionId": "turpan",
+   "position": 3,
+   "title": "Природа",
+   "wordIds": [
+    133,
+    134,
+    135,
+    136,
+    137,
+    138
+   ]
+  },
+  {
+   "id": "turpan-4",
+   "sectionId": "turpan",
+   "position": 4,
+   "title": "Дом",
+   "wordIds": [
+    175,
+    176,
+    177,
+    178,
+    179,
+    180
+   ]
+  },
+  {
+   "id": "turpan-5",
+   "sectionId": "turpan",
+   "position": 5,
+   "title": "Время",
+   "wordIds": [
+    153,
+    154,
+    155,
+    156,
+    157
+   ]
+  },
+  {
+   "id": "turpan-6",
+   "sectionId": "turpan",
+   "position": 6,
+   "title": "Одежда",
+   "wordIds": [
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    200
+   ]
+  },
+  {
+   "id": "turpan-7",
+   "sectionId": "turpan",
+   "position": 7,
+   "title": "Глаголы",
+   "wordIds": [
+    227,
+    228,
+    229,
+    230,
+    231
+   ]
+  },
+  {
+   "id": "turpan-8",
+   "sectionId": "turpan",
+   "position": 8,
+   "title": "Какой?",
+   "wordIds": [
+    255,
+    256,
+    257,
+    258,
+    259,
+    260
+   ]
+  },
+  {
+   "id": "hotan-1",
+   "sectionId": "hotan",
+   "position": 1,
+   "title": "Школа",
+   "wordIds": [
+    201,
+    202,
+    203,
+    204,
+    205
+   ]
+  },
+  {
+   "id": "hotan-2",
+   "sectionId": "hotan",
+   "position": 2,
+   "title": "Культура",
+   "wordIds": [
+    275,
+    276,
+    277,
+    278,
+    279,
+    280
+   ]
+  },
+  {
+   "id": "hotan-3",
+   "sectionId": "hotan",
+   "position": 3,
+   "title": "Семья 2",
+   "wordIds": [
+    19,
+    21,
+    22,
+    23,
+    24,
+    25
+   ]
+  },
+  {
+   "id": "hotan-4",
+   "sectionId": "hotan",
+   "position": 4,
+   "title": "Числа 3",
+   "wordIds": [
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+   ]
+  },
+  {
+   "id": "hotan-5",
+   "sectionId": "hotan",
+   "position": 5,
+   "title": "Еда 2",
+   "wordIds": [
+    85,
+    86,
+    87,
+    88,
+    89,
+    90
+   ]
+  },
+  {
+   "id": "hotan-6",
+   "sectionId": "hotan",
+   "position": 6,
+   "title": "Тело 2",
+   "wordIds": [
+    66,
+    67,
+    68,
+    69,
+    70,
+    71
+   ]
+  },
+  {
+   "id": "hotan-7",
+   "sectionId": "hotan",
+   "position": 7,
+   "title": "Животные 2",
+   "wordIds": [
+    110,
+    111,
+    112,
+    113,
+    114
+   ]
+  },
+  {
+   "id": "hotan-8",
+   "sectionId": "hotan",
+   "position": 8,
+   "title": "Вопросы 2",
+   "wordIds": [
+    217,
+    220,
+    221,
+    222,
+    223,
+    224,
+    225,
+    226
+   ]
+  },
+  {
+   "id": "ghulja-1",
+   "sectionId": "ghulja",
+   "position": 1,
+   "title": "Природа 2",
+   "wordIds": [
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145
+   ]
+  },
+  {
+   "id": "ghulja-2",
+   "sectionId": "ghulja",
+   "position": 2,
+   "title": "Дом 2",
+   "wordIds": [
+    181,
+    182,
+    183,
+    184,
+    185,
+    186
+   ]
+  },
+  {
+   "id": "ghulja-3",
+   "sectionId": "ghulja",
+   "position": 3,
+   "title": "Время 2",
+   "wordIds": [
+    158,
+    159,
+    160,
+    161,
+    162
+   ]
+  },
+  {
+   "id": "ghulja-4",
+   "sectionId": "ghulja",
+   "position": 4,
+   "title": "Глаголы 2",
+   "wordIds": [
+    232,
+    233,
+    234,
+    235,
+    236
+   ]
+  },
+  {
+   "id": "ghulja-5",
+   "sectionId": "ghulja",
+   "position": 5,
+   "title": "Какой? 2",
+   "wordIds": [
+    261,
+    262,
+    263,
+    268,
+    265,
+    266,
+    267
+   ]
+  },
+  {
+   "id": "ghulja-6",
+   "sectionId": "ghulja",
+   "position": 6,
+   "title": "Школа 2",
+   "wordIds": [
+    206,
+    207,
+    208,
+    209,
+    210,
+    211
+   ]
+  },
+  {
+   "id": "ghulja-7",
+   "sectionId": "ghulja",
+   "position": 7,
+   "title": "Культура 2",
+   "wordIds": [
+    281,
+    282,
+    283,
+    284,
+    285,
+    286
+   ]
+  },
+  {
+   "id": "ghulja-8",
+   "sectionId": "ghulja",
+   "position": 8,
+   "title": "Семья 3",
+   "wordIds": [
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+   ]
+  },
+  {
+   "id": "aksu-1",
+   "sectionId": "aksu",
+   "position": 1,
+   "title": "Еда 3",
+   "wordIds": [
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97
+   ]
+  },
+  {
+   "id": "aksu-2",
+   "sectionId": "aksu",
+   "position": 2,
+   "title": "Тело 3",
+   "wordIds": [
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78
+   ]
+  },
+  {
+   "id": "aksu-3",
+   "sectionId": "aksu",
+   "position": 3,
+   "title": "Животные 3",
+   "wordIds": [
+    115,
+    116,
+    117,
+    118,
+    119,
+    120
+   ]
+  },
+  {
+   "id": "aksu-4",
+   "sectionId": "aksu",
+   "position": 4,
+   "title": "Природа 3",
+   "wordIds": [
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152
+   ]
+  },
+  {
+   "id": "aksu-5",
+   "sectionId": "aksu",
+   "position": 5,
+   "title": "Дом 3",
+   "wordIds": [
+    187,
+    188,
+    189,
+    190,
+    191,
+    192
+   ]
+  },
+  {
+   "id": "aksu-6",
+   "sectionId": "aksu",
+   "position": 6,
+   "title": "Время 3",
+   "wordIds": [
+    163,
+    164,
+    165,
+    166,
+    167,
+    168
+   ]
+  },
+  {
+   "id": "aksu-7",
+   "sectionId": "aksu",
+   "position": 7,
+   "title": "Глаголы 3",
+   "wordIds": [
+    237,
+    238,
+    239,
+    240,
+    241,
+    242
+   ]
+  },
+  {
+   "id": "aksu-8",
+   "sectionId": "aksu",
+   "position": 8,
+   "title": "Какой? 3",
+   "wordIds": [
+    264,
+    269,
+    270,
+    271,
+    272,
+    273,
+    274
+   ]
+  },
+  {
+   "id": "urumqi-1",
+   "sectionId": "urumqi",
+   "position": 1,
+   "title": "Культура 3",
+   "wordIds": [
+    287,
+    288,
+    289,
+    290,
+    291,
+    292
+   ]
+  },
+  {
+   "id": "urumqi-2",
+   "sectionId": "urumqi",
+   "position": 2,
+   "title": "Еда 4",
+   "wordIds": [
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104
+   ]
+  },
+  {
+   "id": "urumqi-3",
+   "sectionId": "urumqi",
+   "position": 3,
+   "title": "Животные 4",
+   "wordIds": [
+    121,
+    122,
+    123,
+    124,
+    125,
+    126
+   ]
+  },
+  {
+   "id": "urumqi-4",
+   "sectionId": "urumqi",
+   "position": 4,
+   "title": "Время 4",
+   "wordIds": [
+    169,
+    170,
+    171,
+    172,
+    173,
+    174
+   ]
+  },
+  {
+   "id": "urumqi-5",
+   "sectionId": "urumqi",
+   "position": 5,
+   "title": "Глаголы 4",
+   "wordIds": [
+    243,
+    244,
+    245,
+    246,
+    247,
+    248
+   ]
+  },
+  {
+   "id": "urumqi-6",
+   "sectionId": "urumqi",
+   "position": 6,
+   "title": "Культура 4",
+   "wordIds": [
+    293,
+    294,
+    295,
+    296,
+    297,
+    298
+   ]
+  },
+  {
+   "id": "urumqi-7",
+   "sectionId": "urumqi",
+   "position": 7,
+   "title": "Животные 5",
+   "wordIds": [
+    127,
+    128,
+    129,
+    130,
+    131,
+    132
+   ]
+  },
+  {
+   "id": "urumqi-8",
+   "sectionId": "urumqi",
+   "position": 8,
+   "title": "Глаголы 5",
+   "wordIds": [
+    249,
+    250,
+    251,
+    252,
+    253,
+    254
+   ]
+  }
+ ],
+ "letters": [
+  {
+   "upper": "А",
+   "arabic": "ئا",
+   "exampleWordId": 9,
+   "uyghur": false
+  },
+  {
+   "upper": "Ә",
+   "arabic": "ئە",
+   "exampleWordId": 26,
+   "uyghur": true
+  },
+  {
+   "upper": "Б",
+   "arabic": "ب",
+   "exampleWordId": 15,
+   "uyghur": false
+  },
+  {
+   "upper": "В",
+   "arabic": "ۋ",
+   "exampleWordId": 153,
+   "uyghur": false
+  },
+  {
+   "upper": "Г",
+   "arabic": "گ",
+   "exampleWordId": 85,
+   "uyghur": false
+  },
+  {
+   "upper": "Ғ",
+   "arabic": "غ",
+   "exampleWordId": 117,
+   "uyghur": true
+  },
+  {
+   "upper": "Д",
+   "arabic": "د",
+   "exampleWordId": 13,
+   "uyghur": false
+  },
+  {
+   "upper": "Е",
+   "arabic": "ئې",
+   "exampleWordId": 66,
+   "uyghur": false
+  },
+  {
+   "upper": "Ж",
+   "arabic": "ژ",
+   "exampleWordId": null,
+   "uyghur": false
+  },
+  {
+   "upper": "Җ",
+   "arabic": "ج",
+   "exampleWordId": 172,
+   "uyghur": true
+  },
+  {
+   "upper": "З",
+   "arabic": "ز",
+   "exampleWordId": null,
+   "uyghur": false
+  },
+  {
+   "upper": "И",
+   "arabic": "ئى",
+   "exampleWordId": 33,
+   "uyghur": false
+  },
+  {
+   "upper": "Й",
+   "arabic": "ي",
+   "exampleWordId": 25,
+   "uyghur": false
+  },
+  {
+   "upper": "К",
+   "arabic": "ك",
+   "exampleWordId": 7,
+   "uyghur": false
+  },
+  {
+   "upper": "Қ",
+   "arabic": "ق",
+   "exampleWordId": 22,
+   "uyghur": true
+  },
+  {
+   "upper": "Л",
+   "arabic": "ل",
+   "exampleWordId": 88,
+   "uyghur": false
+  },
+  {
+   "upper": "М",
+   "arabic": "م",
+   "exampleWordId": 16,
+   "uyghur": false
+  },
+  {
+   "upper": "Н",
+   "arabic": "ن",
+   "exampleWordId": 28,
+   "uyghur": false
+  },
+  {
+   "upper": "Ң",
+   "arabic": "ڭ",
+   "exampleWordId": 20,
+   "uyghur": true
+  },
+  {
+   "upper": "О",
+   "arabic": "ئو",
+   "exampleWordId": 21,
+   "uyghur": false
+  },
+  {
+   "upper": "Ө",
+   "arabic": "ئۆ",
+   "exampleWordId": 99,
+   "uyghur": true
+  },
+  {
+   "upper": "П",
+   "arabic": "پ",
+   "exampleWordId": 75,
+   "uyghur": false
+  },
+  {
+   "upper": "Р",
+   "arabic": "ر",
+   "exampleWordId": 3,
+   "uyghur": false
+  },
+  {
+   "upper": "С",
+   "arabic": "س",
+   "exampleWordId": 1,
+   "uyghur": false
+  },
+  {
+   "upper": "Т",
+   "arabic": "ت",
+   "exampleWordId": 35,
+   "uyghur": false
+  },
+  {
+   "upper": "У",
+   "arabic": "ئۇ",
+   "exampleWordId": 19,
+   "uyghur": false
+  },
+  {
+   "upper": "Ү",
+   "arabic": "ئۈ",
+   "exampleWordId": 34,
+   "uyghur": true
+  },
+  {
+   "upper": "Ф",
+   "arabic": "ف",
+   "exampleWordId": null,
+   "uyghur": false
+  },
+  {
+   "upper": "Х",
+   "arabic": "خ",
+   "exampleWordId": 4,
+   "uyghur": false
+  },
+  {
+   "upper": "Һ",
+   "arabic": "ھ",
+   "exampleWordId": 5,
+   "uyghur": true
+  },
+  {
+   "upper": "Ч",
+   "arabic": "چ",
+   "exampleWordId": 67,
+   "uyghur": false
+  },
+  {
+   "upper": "Ш",
+   "arabic": "ش",
+   "exampleWordId": 94,
+   "uyghur": false
+  },
+  {
+   "upper": "Ю",
+   "arabic": "يۇ",
+   "exampleWordId": 135,
+   "uyghur": false
+  },
+  {
+   "upper": "Я",
+   "arabic": "يا",
+   "exampleWordId": 6,
+   "uyghur": false
+  }
+ ],
+ "stories": [
+  {
+   "id": "doppa",
+   "position": 1,
+   "title": "Что такое доппа",
+   "audience": "Детям",
+   "minutes": 2,
+   "art": "doppa",
+   "wordId": 200,
+   "paragraphs": [
+    "Доппа — уйгурская шапочка. Её носят мальчики и девочки, мужчины и женщины.",
+    "У доппы четыре стороны, поэтому сверху она похожа на квадрат. Её можно сложить пополам и положить в карман.",
+    "Мужская доппа чаще всего чёрная, с белым узором «бадам». «Бадам» значит «миндаль»: узор похож на миндальный орешек.",
+    "Женские доппы яркие: их вышивают цветами, золотыми нитками, иногда бусинами. Посмотри на Алима и Райхан — у них тоже доппы!"
+   ],
+   "quiz": [
     {
-      "id": "doppa", "position": 1, "title": "Что такое доппа", "audience": "Детям", "minutes": 2, "art": "doppa", "wordId": 200,
-      "paragraphs": [
-        "Доппа — уйгурская шапочка. Её носят мальчики и девочки, мужчины и женщины.",
-        "У доппы четыре стороны, поэтому сверху она похожа на квадрат. Её можно сложить пополам и положить в карман.",
-        "Мужская доппа чаще всего чёрная, с белым узором «бадам». «Бадам» значит «миндаль»: узор похож на миндальный орешек.",
-        "Женские доппы яркие: их вышивают цветами, золотыми нитками, иногда бусинами. Посмотри на Алима и Райхан — у них тоже доппы!"
-      ],
-      "quiz": [
-        { "question": "Сколько сторон у доппы?", "options": ["Три", "Четыре", "Шесть"], "answer": 1 },
-        { "question": "На что похож узор «бадам»?", "options": ["На миндаль", "На звезду", "На гранат"], "answer": 0 }
-      ]
+     "question": "Сколько сторон у доппы?",
+     "options": [
+      "Три",
+      "Четыре",
+      "Шесть"
+     ],
+     "answer": 1
     },
     {
-      "id": "kashgari", "position": 2, "title": "Махмуд Кашгари и его словарь", "audience": "Взрослым", "minutes": 4, "art": "book", "wordId": 68,
-      "paragraphs": [
-        "Махмуд Кашгари — учёный XI века. Он родом из окрестностей Кашгара, отсюда и его имя.",
-        "В 1070-х годах в Багдаде он написал книгу «Диван лугат ат-турк», «Собрание тюркских наречий». Это словарь тюркских языков с объяснениями на арабском.",
-        "В книге собраны не только слова, но и пословицы, стихи и рассказы о жизни тюркских народов. В неё вошла и круглая карта мира, какой её видел автор.",
-        "Многие слова из словаря Кашгари уйгуры узнают и сегодня. Мавзолей учёного находится в селении Опал недалеко от Кашгара."
-      ],
-      "quiz": [
-        { "question": "В каком веке жил Махмуд Кашгари?", "options": ["В XI веке", "В XV веке", "В XIX веке"], "answer": 0 },
-        { "question": "На каком языке написаны объяснения в словаре?", "options": ["На персидском", "На арабском", "На русском"], "answer": 1 }
-      ]
-    },
-    {
-      "id": "muqam", "position": 3, "title": "Двенадцать мукамов", "audience": "Детям и взрослым", "minutes": 3, "art": "music", "wordId": 286,
-      "paragraphs": [
-        "Мукам — большое музыкальное произведение, в котором соединяются песни, танцы и игра на инструментах.",
-        "Главных мукамов двенадцать. Если исполнить их все подряд, музыка будет звучать больше суток.",
-        "Мукамы играют на рабабе, дутаре и сатаре, а ритм отбивают на бубне — дапе.",
-        "В 2005 году ЮНЕСКО признало уйгурский мукам шедевром устного и нематериального наследия человечества."
-      ],
-      "quiz": [
-        { "question": "Сколько главных мукамов?", "options": ["Семь", "Двенадцать", "Сорок"], "answer": 1 },
-        { "question": "Как называется уйгурский бубен?", "options": ["Дап", "Дутар", "Рабаб"], "answer": 0 }
-      ]
+     "question": "На что похож узор «бадам»?",
+     "options": [
+      "На миндаль",
+      "На звезду",
+      "На гранат"
+     ],
+     "answer": 0
     }
-  ]
+   ]
+  },
+  {
+   "id": "kashgari",
+   "position": 2,
+   "title": "Махмуд Кашгари и его словарь",
+   "audience": "Взрослым",
+   "minutes": 4,
+   "art": "book",
+   "wordId": 68,
+   "paragraphs": [
+    "Махмуд Кашгари — учёный XI века. Он родом из окрестностей Кашгара, отсюда и его имя.",
+    "В 1070-х годах в Багдаде он написал книгу «Диван лугат ат-турк», «Собрание тюркских наречий». Это словарь тюркских языков с объяснениями на арабском.",
+    "В книге собраны не только слова, но и пословицы, стихи и рассказы о жизни тюркских народов. В неё вошла и круглая карта мира, какой её видел автор.",
+    "Многие слова из словаря Кашгари уйгуры узнают и сегодня. Мавзолей учёного находится в селении Опал недалеко от Кашгара."
+   ],
+   "quiz": [
+    {
+     "question": "В каком веке жил Махмуд Кашгари?",
+     "options": [
+      "В XI веке",
+      "В XV веке",
+      "В XIX веке"
+     ],
+     "answer": 0
+    },
+    {
+     "question": "На каком языке написаны объяснения в словаре?",
+     "options": [
+      "На персидском",
+      "На арабском",
+      "На русском"
+     ],
+     "answer": 1
+    }
+   ]
+  },
+  {
+   "id": "muqam",
+   "position": 3,
+   "title": "Двенадцать мукамов",
+   "audience": "Детям и взрослым",
+   "minutes": 3,
+   "art": "music",
+   "wordId": 286,
+   "paragraphs": [
+    "Мукам — большое музыкальное произведение, в котором соединяются песни, танцы и игра на инструментах.",
+    "Главных мукамов двенадцать. Если исполнить их все подряд, музыка будет звучать больше суток.",
+    "Мукамы играют на рабабе, дутаре и сатаре, а ритм отбивают на бубне — дапе.",
+    "В 2005 году ЮНЕСКО признало уйгурский мукам шедевром устного и нематериального наследия человечества."
+   ],
+   "quiz": [
+    {
+     "question": "Сколько главных мукамов?",
+     "options": [
+      "Семь",
+      "Двенадцать",
+      "Сорок"
+     ],
+     "answer": 1
+    },
+    {
+     "question": "Как называется уйгурский бубен?",
+     "options": [
+      "Дап",
+      "Дутар",
+      "Рабаб"
+     ],
+     "answer": 0
+    }
+   ]
+  }
+ ]
 }

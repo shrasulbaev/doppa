@@ -42,7 +42,9 @@ function sceneXml(points: { x: number; y: number }[], height: number, current: n
     `<path d="${road}" fill="none" stroke="#F4DFB2" stroke-width="30" stroke-linecap="round"/>` +
     `<path d="${road}" fill="none" stroke="#D9B26A" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>` +
     (current > 0 ? `<path d="${done}" fill="none" stroke="${colors.gold}" stroke-width="6" stroke-linecap="round"/>` : '') +
-    kashgarDecor +
+    // Декорации повторяются каждые 600 единиц, через раз зеркально
+    Array.from({ length: Math.ceil(height / 600) }, (_, k) =>
+      `<g transform="translate(${k % 2 ? W : 0} ${k * 600}) scale(${k % 2 ? -1 : 1} 1)">${kashgarDecor}</g>`).join('') +
     '</svg>';
 }
 
@@ -133,7 +135,7 @@ export function MapScene({ levels, current, done, who, nextCity, onOpen }: {
           </View>
           {nextCity && (
             <View pointerEvents="none" style={[s.next, { top: (height - 70) * k }]}>
-              <Text style={s.nextText}>Дальше: {nextCity} · скоро</Text>
+              <Text style={s.nextText}>Дальше: {nextCity}</Text>
             </View>
           )}
         </>
