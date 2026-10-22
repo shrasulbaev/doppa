@@ -1,0 +1,35 @@
+// Декорации карты Кашгара (из демо-версии). Координаты в системе 390 × 600.
+export const kashgarDecor = [
+  // полянки
+  '<ellipse cx="60" cy="230" rx="70" ry="30" fill="#E3F2D7"/><ellipse cx="330" cy="430" rx="80" ry="34" fill="#E3F2D7"/><ellipse cx="300" cy="240" rx="60" ry="22" fill="#C9E4B8"/><ellipse cx="70" cy="470" rx="66" ry="24" fill="#C9E4B8"/>',
+  // цветы жёлтые
+  '<g fill="#F2B33D"><circle cx="150" cy="380" r="4"/><circle cx="252" cy="140" r="4"/><circle cx="40" cy="390" r="3"/><circle cx="346" cy="340" r="3"/></g>',
+  // цветы розовые
+  '<g fill="#E86A7A"><circle cx="142" cy="390" r="3.5"/><circle cx="262" cy="148" r="3"/><circle cx="250" cy="520" r="3.5"/><circle cx="130" cy="30" r="3"/></g>',
+  // тополя
+  '<g transform="translate(6,10)"><ellipse cx="40" cy="106" rx="36" ry="5" fill="#B9D9A4"/><rect x="17" y="60" width="4" height="46" fill="#8A5A3B"/><rect x="39" y="50" width="4" height="56" fill="#8A5A3B"/><rect x="61" y="66" width="4" height="40" fill="#8A5A3B"/><ellipse cx="19" cy="48" rx="11" ry="36" fill="#3E9B5F"/><ellipse cx="41" cy="38" rx="12" ry="40" fill="#57B36F"/><ellipse cx="63" cy="56" rx="10" ry="32" fill="#3E9B5F"/></g>',
+  // мечеть
+  '<g transform="translate(272,4)"><ellipse cx="56" cy="134" rx="54" ry="7" fill="#B9D9A4"/><rect x="6" y="38" width="13" height="94" fill="#E2A94E"/><path d="M4 40 L12.5 14 L21 40Z" fill="#4BA3E3"/><rect x="4" y="40" width="17" height="5" fill="#F7D58A"/><rect x="93" y="38" width="13" height="94" fill="#E2A94E"/><path d="M91 40 L99.5 14 L108 40Z" fill="#4BA3E3"/><rect x="91" y="40" width="17" height="5" fill="#F7D58A"/><path d="M38 60 Q56 26 74 60Z" fill="#4BA3E3"/><circle cx="56" cy="32" r="3" fill="#F2B33D"/><rect x="17" y="58" width="78" height="9" fill="#E2A94E"/><rect x="19" y="66" width="74" height="66" fill="#F2C46B"/><path d="M19 78 L93 78 M19 92 L93 92 M19 106 L93 106 M19 120 L93 120" stroke="#E5B35A" stroke-width="1.5"/><path d="M40 132 L40 96 Q56 74 72 96 L72 132Z" fill="#FFF3D6"/><path d="M45 132 L45 99 Q56 84 67 99 L67 132Z" fill="#1872B8"/><path d="M25 102 L25 88 Q29.5 81 34 88 L34 102Z" fill="#4BA3E3"/><path d="M78 102 L78 88 Q82.5 81 87 88 L87 102Z" fill="#4BA3E3"/></g>',
+  // гранатовое дерево
+  '<g transform="translate(6,250)"><ellipse cx="46" cy="106" rx="34" ry="5" fill="#B9D9A4"/><path d="M42 106 L44 66 Q34 58 28 50 M45 72 Q56 62 62 54" fill="none" stroke="#8A5A3B" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="42" r="22" fill="#4FA36A"/><circle cx="60" cy="40" r="24" fill="#57B36F"/><circle cx="46" cy="22" r="20" fill="#4FA36A"/><g fill="#C8384A"><circle cx="24" cy="44" r="6.5"/><circle cx="62" cy="30" r="7"/><circle cx="48" cy="52" r="6"/><circle cx="72" cy="52" r="5.5"/><circle cx="40" cy="16" r="5.5"/></g></g>',
+  // тонур и нан
+  '<g transform="translate(14,400)"><ellipse cx="50" cy="86" rx="48" ry="5" fill="#B9D9A4"/><path d="M8 84 Q6 30 40 24 Q74 30 72 84Z" fill="#C98A5B"/><path d="M14 62 Q40 56 66 62 M11 74 Q40 68 69 74" fill="none" stroke="#B0744A" stroke-width="2.5"/><ellipse cx="40" cy="27" rx="15" ry="5" fill="#5A3420"/><path d="M34 20 Q37 12 34 4 M44 20 Q47 12 44 4" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.8"/><circle cx="84" cy="66" r="16" fill="#E8B06A"/><circle cx="84" cy="66" r="9" fill="#D3944A"/><circle cx="90" cy="46" r="11" fill="#E8B06A"/><circle cx="90" cy="46" r="6" fill="#D3944A"/></g>',
+  // кашгарский дом
+  '<g transform="translate(280,380)"><ellipse cx="52" cy="116" rx="50" ry="6" fill="#B9D9A4"/><rect x="8" y="30" width="88" height="84" fill="#D9A877"/><rect x="4" y="24" width="96" height="9" fill="#B9865A"/><rect x="56" y="6" width="34" height="20" fill="#C9966A"/><rect x="52" y="2" width="42" height="6" fill="#B9865A"/><path d="M24 114 L24 74 Q38 56 52 74 L52 114Z" fill="#2B6CB0"/><path d="M28 114 L28 76 Q38 63 48 76 L48 114 M38 70 L38 114" fill="none" stroke="#7FB2E5" stroke-width="2"/><rect x="64" y="56" width="22" height="24" fill="#2B6CB0"/><path d="M64 68 L86 68 M75 56 L75 80" stroke="#7FB2E5" stroke-width="2"/><rect x="60" y="80" width="30" height="5" fill="#8A5A3B"/><g fill="#C8384A"><circle cx="66" cy="88" r="4"/><circle cx="75" cy="89" r="4"/><circle cx="84" cy="88" r="4"/></g></g>',
+  // виноградник
+  '<g transform="translate(272,505)"><ellipse cx="56" cy="80" rx="52" ry="5" fill="#B9D9A4"/><rect x="12" y="20" width="6" height="60" fill="#8A5A3B"/><rect x="94" y="20" width="6" height="60" fill="#8A5A3B"/><rect x="6" y="16" width="100" height="6" rx="3" fill="#A06B45"/><g fill="#57B36F"><ellipse cx="20" cy="16" rx="14" ry="9"/><ellipse cx="44" cy="12" rx="16" ry="10"/><ellipse cx="70" cy="14" rx="16" ry="10"/><ellipse cx="94" cy="16" rx="14" ry="9"/></g><g fill="#6B3FA0"><circle cx="36" cy="30" r="4"/><circle cx="42" cy="30" r="4"/><circle cx="39" cy="36" r="4"/><circle cx="42" cy="42" r="3.5"/></g><g fill="#8C5CC4"><circle cx="70" cy="30" r="4"/><circle cx="76" cy="30" r="4"/><circle cx="73" cy="36" r="4"/><circle cx="73" cy="42" r="3.5"/></g></g>',
+].join('');
+
+// Обложки историй, система координат 320 × 150
+export const storyArtBg = { doppa: '#FBE3E6', book: '#FDF0D6', music: '#E2F0FB' } as const;
+
+const storyArtBody = {
+  doppa: '<path d="M110 120 L124 52 Q160 38 196 52 L210 120 Q160 108 110 120Z" fill="#1F2A44"/><path d="M114 108 Q160 96 206 108" stroke="#F2B33D" stroke-width="5" fill="none"/><ellipse cx="140" cy="78" rx="8" ry="14" fill="none" stroke="#FFFFFF" stroke-width="3.5" transform="rotate(-20 140 78)"/><ellipse cx="180" cy="78" rx="8" ry="14" fill="none" stroke="#FFFFFF" stroke-width="3.5" transform="rotate(20 180 78)"/><circle cx="160" cy="62" r="4" fill="#C8384A"/>',
+  book: '<path d="M160 48 Q130 36 96 42 L96 124 Q130 118 160 130Z" fill="#FFFFFF" stroke="#B9865A" stroke-width="3"/><path d="M160 48 Q190 36 224 42 L224 124 Q190 118 160 130Z" fill="#FFFFFF" stroke="#B9865A" stroke-width="3"/><g stroke="#8A5A3B" stroke-width="2.5" stroke-linecap="round"><path d="M108 60 Q128 56 148 62M108 74 Q128 70 148 76M108 88 Q128 84 148 90M108 102 Q128 98 148 104"/></g><circle cx="192" cy="82" r="22" fill="none" stroke="#1872B8" stroke-width="3"/><path d="M174 82 H210 M192 64 V100" stroke="#1872B8" stroke-width="2"/>',
+  music: '<rect x="126" y="14" width="12" height="96" rx="4" fill="#8A5A3B" transform="rotate(30 132 110)"/><circle cx="132" cy="112" r="24" fill="#C98A5B"/><circle cx="132" cy="112" r="13" fill="#F4DFB2"/><g fill="#5A3420"><circle cx="172" cy="40" r="4"/><circle cx="164" cy="50" r="4"/></g><circle cx="222" cy="92" r="26" fill="#F4DFB2" stroke="#B0744A" stroke-width="5"/><g fill="#B0744A"><circle cx="222" cy="66" r="3"/><circle cx="246" cy="92" r="3"/><circle cx="222" cy="118" r="3"/><circle cx="198" cy="92" r="3"/></g>',
+};
+
+export function storyArtXml(kind: keyof typeof storyArtBody): string {
+  return '<svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">' +
+    '<g opacity=".5" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M-10 150 Q30 90 70 150M60 150 Q100 90 140 150M180 150 Q220 90 260 150M250 150 Q290 90 330 150"/></g>' + storyArtBody[kind] + '</svg>';
+}
