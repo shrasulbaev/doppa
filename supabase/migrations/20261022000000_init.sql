@@ -93,11 +93,11 @@ create policy "content is public" on letters for select using (true);
 create policy "content is public" on stories for select using (true);
 
 create policy "own profile" on profiles for all
-  using (auth.uid() = id) with check (auth.uid() = id);
+  using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
 create policy "own level progress" on level_progress for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "own story progress" on story_progress for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 -- Аудио носителей: публичное чтение, файлы называются как в словаре (ug_0001.mp3)
 insert into storage.buckets (id, name, public) values ('audio', 'audio', true)

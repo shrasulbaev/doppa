@@ -14,9 +14,10 @@
 
 ```bash
 npm install
-cp .env.example .env   # необязательно: без него работает демо-режим
 npx expo start
 ```
+
+Ключи Supabase лежат в `.env` (проект `doppa`). Если удалить `.env`, приложение перейдёт в демо-режим без сервера.
 
 Expo Go подходит для проверки. Для сборок в магазины используйте EAS:
 
@@ -29,9 +30,11 @@ npx eas-cli@latest build --platform ios
 
 ## Supabase
 
-1. Создайте проект на supabase.com и впишите URL и publishable key в `.env`.
-2. Примените схему и контент: `supabase db push` (или выполните `supabase/migrations/*.sql`, затем `supabase/seed.sql` в SQL Editor).
-3. Включите вход: Authentication → Providers → Email (код из 6 цифр) и Phone (нужен SMS-провайдер, например Twilio).
+Проект `doppa` (регион Франкфурт) уже создан: схема из `supabase/migrations` применена, словарь, уровни, алфавит и истории загружены из `supabase/seed.sql`.
+
+Для нового проекта: впишите его URL и publishable key в `.env`, примените миграции (`supabase db push`) и выполните `supabase/seed.sql`.
+
+Вход по почте: в Authentication → Email Templates → Magic Link замените ссылку на код `{{ .Token }}`, чтобы письмо приходило с 6 цифрами. Встроенная почта Supabase пишет только адресам участников организации и не чаще пары писем в час; для реальных учеников подключите свой SMTP (Authentication → SMTP Settings). Вход по телефону: Authentication → Providers → Phone, нужен SMS-провайдер, например Twilio.
 
 ## Контент
 
