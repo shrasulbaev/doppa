@@ -10,7 +10,7 @@ const CACHE_KEY = 'doppa.content.v1';
 export const bundled: Course = {
   words: dictionary as Word[],
   sections: course.sections,
-  levels: course.levels,
+  levels: course.levels as Level[],
   letters: course.letters,
   stories: course.stories as Story[],
 };
@@ -43,6 +43,7 @@ export async function fetchRemoteContent(): Promise<Course | null> {
     sections: s.data.map((r) => ({ id: r.id, position: r.position, title: r.title, city: r.city })),
     levels: l.data.map((r) => ({
       id: r.id, sectionId: r.section_id, position: r.position, title: r.title, wordIds: r.word_ids,
+      kind: r.kind ?? 'words', rule: r.rule, items: r.items,
     })),
     letters: a.data.map((r) => ({
       upper: r.upper, arabic: r.arabic, exampleWordId: r.example_word_id, uyghur: r.is_uyghur,

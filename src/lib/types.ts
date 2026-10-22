@@ -11,9 +11,19 @@ export type Word = {
   pos: string | null;
   status: string;
   audio: string | null;
+  /** Только у фраз грамматических уровней: группа (основа слова), из неё берутся варианты ответа */
+  group?: string;
+  /** Только у фраз: лишние слова для сборки предложения */
+  wrong?: string[];
 };
 
 export type Section = { id: string; position: number; title: string; city: string };
+
+/** Фраза или форма слова для грамматического уровня */
+export type Phrase = { ug: string; ru: string; group?: string; wrong?: string[] };
+
+/** Объяснение правила в начале грамматического уровня */
+export type Rule = { text: string; examples: { ug: string; ru: string }[] };
 
 export type Level = {
   id: string;
@@ -21,6 +31,10 @@ export type Level = {
   position: number;
   title: string;
   wordIds: number[];
+  /** words — урок слов из словаря, phrases — грамматика и предложения */
+  kind?: 'words' | 'phrases';
+  rule?: Rule | null;
+  items?: Phrase[] | null;
 };
 
 export type Letter = { upper: string; arabic: string; exampleWordId: number | null; uyghur: boolean };

@@ -1,9 +1,11 @@
 // Сборка и проверка заданий урока. Без React и сети, чтобы легко тестировать.
-import type { Word } from './types';
+import type { Level, Rule, Word } from './types';
 
 export type Step =
   | { kind: 'intro'; word: Word }
   | { kind: 'choose'; word: Word; direction: 'ug-ru' | 'ru-ug'; options: string[]; answer: string }
+  | { kind: 'rule'; rule: Rule }
+  /** Сборка слова из букв или, для фраз, предложения из слов */
   | { kind: 'build'; word: Word; tiles: { id: number; char: string }[] }
   | { kind: 'match'; words: Word[]; left: Word[]; right: Word[] };
 
@@ -26,16 +28,22 @@ export function prepare(step: Step, pool: Word[], rng: Rng = Math.random): Step 
     case 'choose': {
       const field = step.direction === 'ug-ru' ? 'ruShort' : 'ug';
       const answer = step.word[field];
-      // Отвлекающие варианты не должны совпадать со словом ни по-уйгурски, ни по переводу
-      const others = shuffle(
-        Array.from(new Set(pool
-          .filter((w) => w.ug !== step.word.ug && w.ruShort !== step.word.ruShort)
-          .map((w) => w[field]))),
-        rng,
-      ).slice(0, 3);
+      // Отвлекающие варианты не должны совпадать со словом ни по-уйгурски, ни по переводу.
+      // У фраз сначала берём формы того же слова: атам, атаң, атиси.
+      const fits = pool.filter((w) => w.ug !== step.word.ug && w.ruShort !== step.word.ruShort);
+      const group = step.word.group;
+      const others = Array.from(new Set([
+        ...shuffle(fits.filter((w) => group && w.group === group), rng),
+        ...shuffle(fits.filter((w) => !group || w.group !== group), rng),
+      ].map((w) => w[field]))).slice(0, 3);
       return { ...step, answer, options: shuffle([...others, answer], rng) };
     }
     case 'build': {
+      if (isPhrase(step.word)) {
+        const parts = phraseParts(step.word.ug);
+        const extra = (step.word.wrong ?? []).map((w) => w.toLowerCase()).filter((w) => !parts.includes(w));
+        return { ...step, tiles: shuffle([...parts, ...extra], rng).map((char, id) => ({ id, char })) };
+      }
       const letters = Array.from(step.word.ug);
       const extra = shuffle(DISTRACTOR_LETTERS.filter((c) => !letters.includes(c)), rng).slice(0, 2);
       const tiles = shuffle([...letters, ...extra], rng).map((char, id) => ({ id, char }));
@@ -69,7 +77,48 @@ export function checkChoose(step: Extract<Step, { kind: 'choose' }>, picked: str
 }
 
 export function checkBuild(step: Extract<Step, { kind: 'build' }>, built: string[]): boolean {
-  return built.join('') === step.word.ug;
+  return isPhrase(step.word)
+    ? built.join(' ') === phraseParts(step.word.ug).join(' ')
+    : built.join('') === step.word.ug;
+}
+
+/** Фраза собирается из слов, а не из букв */
+export function isPhrase(w: Word): boolean {
+  return w.id < 0 && w.ug.includes(' ');
+}
+
+/** Слова фразы для плиток: в нижнем регистре, чтобы заглавная буква не подсказывала начало */
+export function phraseParts(ug: string): string[] {
+  return ug.toLowerCase().split(/\s+/).filter(Boolean);
+}
+
+/** Фразы грамматического уровня в виде слов, чтобы работали те же задания. Номера отрицательные. */
+export function levelPhrases(level: Level): Word[] {
+  return (level.items ?? []).map((p, k) => ({
+    id: -(k + 1), topic: level.title, ug: p.ug, arabic: null, latin: null, ru: p.ru, ruShort: p.ru,
+    pos: 'фраза', status: 'не проверено', audio: null, group: p.group, wrong: p.wrong,
+  }));
+}
+
+/**
+ * Урок грамматики: правило, потом каждая фраза знакомится и закрепляется.
+ * Отдельные формы слова (атам, атаң) учим выбором, предложения собираем из слов.
+ */
+export function buildPhraseLesson(level: Level, rng: Rng = Math.random): Step[] {
+  const items = levelPhrases(level);
+  const choose = (word: Word, direction: 'ug-ru' | 'ru-ug'): Step =>
+    ({ kind: 'choose', word, direction, options: [], answer: '' });
+  const plan: Step[] = level.rule ? [{ kind: 'rule', rule: level.rule }] : [];
+  for (let i = 0; i < items.length; i += 2) {
+    const pair = items.slice(i, i + 2);
+    pair.forEach((word) => plan.push({ kind: 'intro', word }));
+    pair.forEach((word) => plan.push(isPhrase(word) ? { kind: 'build', word, tiles: [] } : choose(word, 'ru-ug')));
+    pair.forEach((word, k) => {
+      if (isPhrase(word) || k === 1) plan.push(choose(word, 'ug-ru'));
+    });
+    if (i >= 2 && i % 4 === 2) plan.push({ kind: 'match', words: items.slice(i - 2, i + 2), left: [], right: [] });
+  }
+  return plan.map((s) => prepare(s, items, rng));
 }
 
 /** Звёзды за уровень: 3 без ошибок, 2 за одну-две ошибки, иначе 1. */

@@ -1,4 +1,5 @@
 // Урок: знакомство со словами, выбор перевода, сборка слова из букв, поиск пар.
+// Грамматический урок начинается с правила, а предложения собираются из слов.
 // Ошибочные задания повторяются в конце урока.
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -10,7 +11,7 @@ import { Avatar } from '@/components/Avatar';
 import { ApricotIcon, CheckIcon, CloseIcon, PomegranateIcon, StarIcon } from '@/components/icons';
 import { Bubble, Button, ProgressBar, SpeakButton, T, TopBar, ui } from '@/components/ui';
 import { levelWords } from '@/lib/content';
-import { buildLesson, checkBuild, checkChoose, prepare, type Step } from '@/lib/lesson';
+import { buildLesson, buildPhraseLesson, checkBuild, checkChoose, isPhrase, levelPhrases, prepare, type Step } from '@/lib/lesson';
 import { nextHeartIn } from '@/lib/rules';
 import { useSpeech } from '@/lib/speech';
 import { useStore } from '@/lib/store';
@@ -24,6 +25,10 @@ export default function LessonScreen() {
   const { content, words } = useStore();
   const level = content.levels.find((l) => l.id === levelId);
   if (!level) return null;
+  if (level.kind === 'phrases') {
+    const items = levelPhrases(level);
+    return <Lesson key={level.id} level={level} words={items} pool={items} />;
+  }
   return <Lesson key={level.id} level={level} words={levelWords(level, words)} pool={content.words} />;
 }
 
@@ -33,7 +38,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
   const who: AvatarId = progress?.avatar ?? 'raihan';
   const { speak, talking } = useSpeech();
 
-  const [steps, setSteps] = useState<Step[]>(() => buildLesson(words, pool));
+  const [steps, setSteps] = useState<Step[]>(() => (level.kind === 'phrases' ? buildPhraseLesson(level) : buildLesson(words, pool)));
   const [i, setI] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [checked, setChecked] = useState<null | { ok: boolean; praise: string }>(null);
@@ -116,10 +121,29 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
   let body: React.ReactNode = null;
   let foot: React.ReactNode = null;
 
-  if (step.kind === 'intro') {
+  if (step.kind === 'rule') {
     body = (
       <>
-        <T variant="eyebrow">Новое слово</T>
+        <T variant="eyebrow">Правило</T>
+        <View style={[ui.row, { alignItems: 'flex-end' }]}>
+          <Avatar who={who} width={110} height={130} talking={talking} />
+          <Bubble style={{ flex: 1, marginBottom: 10 }}><Text style={s.ruleText}>{step.rule.text}</Text></Bubble>
+        </View>
+        <Bubble style={{ gap: 10 }}>
+          {step.rule.examples.map((e) => (
+            <View key={e.ug} style={[ui.row, { justifyContent: 'space-between', gap: 12 }]}>
+              <Text style={[s.optText, { color: colors.blue, fontSize: 20, textAlign: 'left' }]}>{e.ug}</Text>
+              <Text style={[s.optText, { fontSize: 15, flexShrink: 1, textAlign: 'right' }]}>{e.ru}</Text>
+            </View>
+          ))}
+        </Bubble>
+      </>
+    );
+    foot = <Button variant="blue" title="Понятно" onPress={next} />;
+  } else if (step.kind === 'intro') {
+    body = (
+      <>
+        <T variant="eyebrow">{step.word.id < 0 ? 'Новая фраза' : 'Новое слово'}</T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={150} height={176} talking={talking} />
           <Bubble style={{ flex: 1, gap: 8, marginBottom: 14 }}>
@@ -171,9 +195,10 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
     );
     foot = <CheckFoot checked={checked} canCheck={picked !== null} answer={`${step.word.ug} — ${step.word.ruShort}`} onCheck={check} onNext={next} />;
   } else if (step.kind === 'build') {
+    const phrase = isPhrase(step.word);
     body = (
       <>
-        <T variant="eyebrow">Собери слово по-уйгурски</T>
+        <T variant="eyebrow">{phrase ? 'Собери фразу по-уйгурски' : 'Собери слово по-уйгурски'}</T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={110} height={130} talking={talking} />
           <Bubble style={{ flex: 1, marginBottom: 10 }}><Text style={s.prompt}>{step.word.ruShort}</Text></Bubble>
@@ -186,7 +211,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
               </Pressable>
             ))
           ) : (
-            <T variant="muted" style={{ fontSize: 14 }}>Нажимай на буквы ниже</T>
+            <T variant="muted" style={{ fontSize: 14 }}>{phrase ? 'Нажимай на слова ниже' : 'Нажимай на буквы ниже'}</T>
           )}
         </View>
         <View style={s.tiles}>
@@ -196,7 +221,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
               <Pressable
                 key={t.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Буква ${t.char}`}
+                accessibilityLabel={phrase ? t.char : `Буква ${t.char}`}
                 disabled={used || !!checked}
                 onPress={() => setBuilt([...built, t.id])}
                 style={[s.tile, used && { opacity: 0 }]}>
@@ -332,7 +357,7 @@ function Result({ who, level, words, mistakes, stars, gain }: {
             <ApricotIcon />
             <Text style={[s.pill, { color: '#8A5A00' }]}>+{gain} абрикосов</Text>
           </Bubble>
-          <Bubble style={{ borderRadius: 14 }}><Text style={s.pill}>{words} новых слов</Text></Bubble>
+          <Bubble style={{ borderRadius: 14 }}><Text style={s.pill}>{words} {level.kind === 'phrases' ? 'новых фраз' : 'новых слов'}</Text></Bubble>
         </View>
       </ScrollView>
       <View style={[ui.foot, { paddingBottom: insets.bottom + 18 }]}>
@@ -366,6 +391,7 @@ function NoHearts({ who, onExit }: { who: AvatarId; onExit: () => void }) {
 const s = StyleSheet.create({
   wordBig: { fontFamily: fonts.black, fontSize: 30, lineHeight: 34, color: colors.blue },
   translation: { fontFamily: fonts.black, fontSize: 24, color: colors.ink, textAlign: 'center' },
+  ruleText: { fontFamily: fonts.bold, fontSize: 17, lineHeight: 24, color: colors.ink },
   prompt: { fontFamily: fonts.black, fontSize: 22, color: colors.ink, flexShrink: 1 },
   opts: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   opt: {

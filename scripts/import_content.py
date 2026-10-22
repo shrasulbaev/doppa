@@ -68,6 +68,8 @@ def main():
     for lvl in course["levels"]:
         missing = [i for i in lvl["wordIds"] if i not in ids]
         assert not missing, f"{lvl['id']}: нет слов {missing}"
+        if lvl.get("kind") == "phrases":
+            assert lvl.get("items"), f"{lvl['id']}: у грамматического уровня нет фраз"
 
     (ROOT / "content" / "dictionary.json").write_text(
         json.dumps(words, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
@@ -80,7 +82,9 @@ def main():
     for s in course["sections"]:
         out.append(f"insert into sections (id, position, title, city) values ({q(s['id'])}, {s['position']}, {q(s['title'])}, {q(s['city'])});")
     for l in course["levels"]:
-        out.append(f"insert into levels (id, section_id, position, title, word_ids) values ({q(l['id'])}, {q(l['sectionId'])}, {l['position']}, {q(l['title'])}, {arr(l['wordIds'])});")
+        rule = q(json.dumps(l["rule"], ensure_ascii=False)) + "::jsonb" if l.get("rule") else "null"
+        items = q(json.dumps(l["items"], ensure_ascii=False)) + "::jsonb" if l.get("items") else "null"
+        out.append(f"insert into levels (id, section_id, position, title, word_ids, kind, rule, items) values ({q(l['id'])}, {q(l['sectionId'])}, {l['position']}, {q(l['title'])}, {arr(l['wordIds']) if l['wordIds'] else "'{}'::int[]"}, {q(l.get('kind', 'words'))}, {rule}, {items});")
     for i, l in enumerate(course["letters"], 1):
         out.append(f"insert into letters (position, upper, arabic, example_word_id, is_uyghur) values ({i}, {q(l['upper'])}, {q(l['arabic'])}, {q(l['exampleWordId'])}, {q(l['uyghur'])});")
     for s in course["stories"]:
@@ -89,7 +93,8 @@ def main():
                    f"{arr(s['paragraphs'])}, {q(json.dumps(s['quiz'], ensure_ascii=False))}::jsonb);")
     out.append("commit;")
     (ROOT / "supabase" / "seed.sql").write_text("\n".join(out) + "\n", encoding="utf-8")
-    print(f"Слов: {len(words)}, уровней: {len(course['levels'])}, историй: {len(course['stories'])}")
+    grammar = sum(1 for l in course["levels"] if l.get("kind") == "phrases")
+    print(f"Слов: {len(words)}, уровней: {len(course['levels'])} (из них грамматика: {grammar}), историй: {len(course['stories'])}")
 
 
 if __name__ == "__main__":
