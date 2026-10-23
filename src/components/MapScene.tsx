@@ -170,7 +170,8 @@ export function MapScene({ levels, states, who, scene, sign, teacher, onOpen }: 
                 style={[s.friend, {
                   width: boxW,
                   left: onRight ? width - boxW - 0.01 * width : 0.01 * width,
-                  top: p.y * k - avatarW * 1.6 - 18 * k,
+                  // Не залезаем на табличку города над первым уровнем
+                  top: Math.max(118 * k, p.y * k - avatarW * 1.6 - 18 * k),
                 }]}>
                 <View style={s.hello}>
                   <Text style={s.helloUg} numberOfLines={2}>{teacher.ug}</Text>

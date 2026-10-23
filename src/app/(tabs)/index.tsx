@@ -8,6 +8,7 @@ import {
 import { sceneFor } from '@/components/cityArt';
 import { MapScene, type CitySign, type Teacher } from '@/components/MapScene';
 import { ProverbCard } from '@/components/ProverbCard';
+import { ReviewCard } from '@/components/ReviewCard';
 import { levelStates, type LevelState } from '@/lib/rules';
 import { useStore } from '@/lib/store';
 import { colors, fonts } from '@/lib/theme';
@@ -105,6 +106,7 @@ export default function MapTab() {
         </ScrollView>
       </View>
       <ProverbCard />
+      <ReviewCard />
       {sections.map((sec, si) => {
         const secStates = sec.levels.map((l) => stateOf.get(l.id) ?? 'lock');
         const curIdx = secStates.indexOf('cur');

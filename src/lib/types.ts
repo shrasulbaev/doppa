@@ -15,6 +15,12 @@ export type Word = {
   group?: string;
   /** Только у фраз: лишние слова для сборки предложения */
   wrong?: string[];
+  /** arabic — поле ug записано арабской графикой (уроки письменности) */
+  script?: 'arabic';
+  /** Подсказка под словом при знакомстве: как читается или что значит */
+  hint?: string;
+  /** Формы буквы в начале, середине и конце слова */
+  forms?: string;
 };
 
 export type Section = { id: string; position: number; title: string; city: string };
@@ -73,6 +79,8 @@ export type Progress = {
   heartsUpdatedAt: number;
   levels: Record<string, { stars: number; completedAt: string }>;
   stories: Record<string, { completedAt: string }>;
+  /** Ошибки для «Работы над ошибками»: ключ «уровень|слово» → когда ошиблись (мс) */
+  mistakes?: Record<string, number>;
   /** Тестовая учётка: открыты все уровни */
   unlockAll?: boolean;
 };

@@ -1,9 +1,10 @@
 // Урок: знакомство со словами, выбор перевода, сборка слова из букв, поиск пар.
 // Грамматический урок начинается с правила, а предложения собираются из слов.
-// Ошибочные задания повторяются в конце урока.
+// Ошибочные задания повторяются в конце урока и запоминаются для «Работы над ошибками».
+// Тот же экран ведёт уроки арабской графики: там поле ug записано арабицей.
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,34 +12,108 @@ import { Avatar } from '@/components/Avatar';
 import { ApricotIcon, CheckIcon, CloseIcon, PomegranateIcon, StarIcon } from '@/components/icons';
 import { Bubble, Button, ProgressBar, SpeakButton, T, TopBar, ui } from '@/components/ui';
 import { levelWords } from '@/lib/content';
-import { buildLesson, buildPhraseLesson, checkBuild, checkChoose, isPhrase, levelPhrases, prepare, type Step } from '@/lib/lesson';
+import { buildLesson, buildPhraseLesson, checkBuild, checkChoose, isPhrase, levelPhrases, shuffle, starsFor, type Step } from '@/lib/lesson';
+import { REVIEW_ID, buildReview, reviewItems } from '@/lib/review';
 import { nextHeartIn } from '@/lib/rules';
 import { useSpeech } from '@/lib/speech';
 import { useStore } from '@/lib/store';
 import { colors, fonts } from '@/lib/theme';
-import type { AvatarId, Level, Word } from '@/lib/types';
+import type { AvatarId, Word } from '@/lib/types';
+import { WRITING_LEVELS, buildWritingLesson, isWritingLevel } from '@/lib/writing';
 
 const PRAISE = ['Барикалла!', 'Верно!', 'Отлично!', 'Так держать!'];
 
 export default function LessonScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
-  const { content, words } = useStore();
+  const { content, words, completeLevel, noteMistake } = useStore();
+  if (levelId === REVIEW_ID) return <ReviewLesson />;
+  const writing = isWritingLevel(levelId) ? WRITING_LEVELS.find((l) => l.id === levelId) : undefined;
+  if (writing) {
+    const unit = { letters: 'новых букв', forms: 'форм букв', read: 'слов прочитано', write: 'слов написано', phrases: 'фраз прочитано' }[writing.kind];
+    return (
+      <Lesson
+        key={writing.id}
+        title={writing.title}
+        unit={unit}
+        make={() => buildWritingLesson(writing, content)}
+        onMiss={(w) => noteMistake(writing.id, w.ug)}
+        onFinish={(m) => completeLevel(writing.id, m)}
+      />
+    );
+  }
   const level = content.levels.find((l) => l.id === levelId);
   if (!level) return null;
-  if (level.kind === 'phrases') {
-    const items = levelPhrases(level);
-    return <Lesson key={level.id} level={level} words={items} pool={items} />;
-  }
-  return <Lesson key={level.id} level={level} words={levelWords(level, words)} pool={content.words} />;
+  const phrases = level.kind === 'phrases';
+  const items = phrases ? levelPhrases(level) : levelWords(level, words);
+  return (
+    <Lesson
+      key={level.id}
+      title={level.title}
+      unit={phrases ? 'новых фраз' : 'новых слов'}
+      count={items.length}
+      make={() => (phrases ? buildPhraseLesson(level) : buildLesson(items, content.words))}
+      onMiss={(w) => noteMistake(level.id, w.ug)}
+      onFinish={(m) => completeLevel(level.id, m)}
+    />
+  );
 }
 
-function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Word[] }) {
+/** Работа над ошибками: слова, где ошибался, повторяются; верно отвеченные уходят из списка */
+function ReviewLesson() {
+  const { content, progress, noteMistake, clearMistake, completeReview } = useStore();
+  const [items] = useState(() => reviewItems(progress?.mistakes, content));
+  const failed = useRef(new Set<string>());
+  const keyOf = new Map(items.map((it) => [it.word.ug, it]));
+  return (
+    <Lesson
+      title="Работа над ошибками"
+      unit="слов повторено"
+      count={items.length}
+      make={() => buildReview(items)}
+      onMiss={(w) => {
+        const it = keyOf.get(w.ug);
+        if (!it) return;
+        failed.current.add(it.key);
+        noteMistake(it.levelId, w.ug);
+      }}
+      onFinish={(m) => {
+        for (const it of items) if (!failed.current.has(it.key)) clearMistake(it.key);
+        return { stars: starsFor(m), ...completeReview() };
+      }}
+    />
+  );
+}
+
+/** Повтор задания в конце урока: те же варианты, но в другом порядке */
+function again(s: Step): Step {
+  if (s.kind === 'choose') return { ...s, options: shuffle(s.options) };
+  if (s.kind === 'build') return { ...s, tiles: shuffle(s.tiles.map((x) => x.char)).map((char, id) => ({ id, char })) };
+  if (s.kind === 'match') return { ...s, left: shuffle(s.left), right: shuffle(s.right) };
+  return s;
+}
+
+const AR = (w: Word) => w.script === 'arabic';
+
+/** Правильный ответ после ошибки. Арабицу изолируем, чтобы она не перемешалась с кириллицей. */
+function answerText(w: Word): string {
+  return AR(w) ? `${w.ruShort} — \u2067${w.ug}\u2069` : `${w.ug} — ${w.ruShort}`;
+}
+
+function Lesson({ title, unit, count, make, onMiss, onFinish }: {
+  title: string;
+  /** Подпись к числу на экране итогов: «новых слов», «новых букв» */
+  unit: string;
+  count?: number;
+  make: () => Step[];
+  onMiss: (w: Word) => void;
+  onFinish: (mistakes: number) => { stars: number; gain: number };
+}) {
   const insets = useSafeAreaInsets();
-  const { progress, hearts, loseHeart, completeLevel } = useStore();
+  const { progress, hearts, loseHeart } = useStore();
   const who: AvatarId = progress?.avatar ?? 'raihan';
   const { speak, talking } = useSpeech();
 
-  const [steps, setSteps] = useState<Step[]>(() => (level.kind === 'phrases' ? buildPhraseLesson(level) : buildLesson(words, pool)));
+  const [steps, setSteps] = useState<Step[]>(make);
   const [i, setI] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [checked, setChecked] = useState<null | { ok: boolean; praise: string }>(null);
@@ -49,17 +124,18 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
   const [flash, setFlash] = useState<number | null>(null);
   const [result, setResult] = useState<null | { stars: number; gain: number }>(null);
   const [outOfHearts, setOutOfHearts] = useState(hearts <= 0);
+  const introduced = new Set(steps.filter((s) => s.kind === 'intro').map((s) => (s.kind === 'intro' ? s.word.ug : '')));
 
   const step = steps[i];
 
-  // Новое слово сразу проговаривается
+  // Новое слово сразу проговаривается. У букв арабицы записей нет, их не озвучиваем.
   useEffect(() => {
-    if (step?.kind === 'intro') speak(step.word);
+    if (step?.kind === 'intro' && !step.word.forms) speak(step.word);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i]);
 
   if (outOfHearts) return <NoHearts who={who} onExit={() => router.back()} />;
-  if (result) return <Result who={who} level={level} words={words.length} mistakes={mistakes} {...result} />;
+  if (result) return <Result who={who} title={title} unit={unit} count={count ?? introduced.size} mistakes={mistakes} {...result} />;
   if (!step) return <Broken who={who} text="В этом уровне пока нет заданий." />;
 
   function feedback(ok: boolean) {
@@ -69,7 +145,8 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
   function miss(s: Step) {
     setMistakes((m) => m + 1);
     loseHeart();
-    setSteps((all) => [...all, prepare(s, pool)]);
+    if (s.kind === 'choose' || s.kind === 'build') onMiss(s.word);
+    setSteps((all) => [...all, again(s)]);
   }
 
   function check() {
@@ -97,7 +174,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
     setMatchLeft(null);
     setMatched([]);
     setFlash(null);
-    if (i + 1 >= steps.length) setResult(completeLevel(level.id, mistakes));
+    if (i + 1 >= steps.length) setResult(onFinish(mistakes));
     else setI(i + 1);
   }
 
@@ -115,6 +192,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
       setTimeout(() => setFlash(null), 600);
       setMistakes((m) => m + 1);
       loseHeart();
+      onMiss(left);
     }
   }
 
@@ -132,7 +210,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
         <Bubble style={{ gap: 10 }}>
           {step.rule.examples.map((e) => (
             <View key={e.ug} style={[ui.row, { justifyContent: 'space-between', gap: 12 }]}>
-              <Text style={[s.optText, { color: colors.blue, fontSize: 20, textAlign: 'left' }]}>{e.ug}</Text>
+              <Text style={[s.optText, { color: colors.blue, fontSize: 20, textAlign: 'left' }, step.script === 'arabic' && s.ar]}>{e.ug}</Text>
               <Text style={[s.optText, { fontSize: 15, flexShrink: 1, textAlign: 'right' }]}>{e.ru}</Text>
             </View>
           ))}
@@ -143,17 +221,28 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
   } else if (step.kind === 'intro') {
     body = (
       <>
-        <T variant="eyebrow">{step.word.id < 0 ? 'Новая фраза' : 'Новое слово'}</T>
+        <T variant="eyebrow">
+          {step.word.forms ? 'Новая буква' : AR(step.word) ? 'Читаем арабицей' : step.word.id < 0 ? 'Новая фраза' : 'Новое слово'}
+        </T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={150} height={176} talking={talking} />
           <Bubble style={{ flex: 1, gap: 8, marginBottom: 14 }}>
-            <Text style={s.wordBig}>{step.word.ug}</Text>
+            <Text style={[s.wordBig, AR(step.word) && s.arBig]}>{step.word.ug}</Text>
+            {!!step.word.hint && <T variant="muted">{step.word.hint}</T>}
             {!!step.word.arabic && <T variant="arabic">{step.word.arabic}</T>}
-            <SpeakButton filled label="Прослушать" onPress={() => speak(step.word)} />
+            {!step.word.forms && <SpeakButton filled label="Прослушать" onPress={() => speak(step.word)} />}
           </Bubble>
         </View>
+        {!!step.word.forms && (
+          <Bubble style={{ alignItems: 'center', gap: 4 }}>
+            <T variant="muted" style={{ fontSize: 14 }}>
+              {step.word.forms.trim().split(/\s+/).length === 3 ? 'В конце · в середине · в начале слова' : 'После другой буквы · отдельно'}
+            </T>
+            <Text style={[s.ar, s.forms]}>{step.word.forms}</Text>
+          </Bubble>
+        )}
         <Bubble style={{ alignItems: 'center' }}>
-          <T variant="muted" style={{ fontSize: 14 }}>Перевод</T>
+          <T variant="muted" style={{ fontSize: 14 }}>{step.word.forms ? 'Буква' : AR(step.word) ? 'Читается' : 'Перевод'}</T>
           <Text style={s.translation}>{step.word.ru}</Text>
         </Bubble>
       </>
@@ -161,14 +250,18 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
     foot = <Button variant="blue" title="Понятно" onPress={next} />;
   } else if (step.kind === 'choose') {
     const ug = step.direction === 'ug-ru';
+    const ar = AR(step.word);
+    const eyebrow = ar
+      ? ug ? (isPhrase(step.word) ? 'Что здесь написано?' : 'Как это читается?') : 'Найди, как это пишется'
+      : ug ? 'Переведи на русский' : 'Как это по-уйгурски?';
     body = (
       <>
-        <T variant="eyebrow">{ug ? 'Переведи на русский' : 'Как это по-уйгурски?'}</T>
+        <T variant="eyebrow">{eyebrow}</T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={110} height={130} talking={talking} />
           <Bubble style={[ui.row, { flex: 1, marginBottom: 10, justifyContent: 'space-between' }]}>
-            <Text style={[s.prompt, ug && { color: colors.blue, fontSize: 28 }]}>{ug ? step.word.ug : step.word.ruShort}</Text>
-            {ug && <SpeakButton label="Прослушать" onPress={() => speak(step.word)} />}
+            <Text style={[s.prompt, ug && { color: colors.blue, fontSize: 28 }, ug && ar && s.arBig]}>{ug ? step.word.ug : step.word.ruShort}</Text>
+            {ug && !ar && <SpeakButton label="Прослушать" onPress={() => speak(step.word)} />}
           </Bubble>
         </View>
         <View style={s.opts}>
@@ -184,7 +277,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
                 disabled={!!checked}
                 onPress={() => setPicked(o)}
                 style={[s.opt, sel && s.optSel, good && s.optGood, bad && s.optBad]}>
-                <Text style={[s.optText, !ug && { color: colors.blue }, sel && { color: colors.blueDark }, good && { color: colors.okInk }, bad && { color: colors.redDark }]}>
+                <Text style={[s.optText, !ug && { color: colors.blue }, !ug && ar && s.arOpt, sel && { color: colors.blueDark }, good && { color: colors.okInk }, bad && { color: colors.redDark }]}>
                   {o}
                 </Text>
               </Pressable>
@@ -193,28 +286,40 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
         </View>
       </>
     );
-    foot = <CheckFoot checked={checked} canCheck={picked !== null} answer={`${step.word.ug} — ${step.word.ruShort}`} onCheck={check} onNext={next} />;
+    foot = <CheckFoot checked={checked} canCheck={picked !== null} answer={answerText(step.word)} onCheck={check} onNext={next} />;
   } else if (step.kind === 'build') {
     const phrase = isPhrase(step.word);
+    const ar = AR(step.word);
+    const eyebrow = ar
+      ? phrase ? 'Собери фразу арабицей' : 'Напиши арабицей'
+      : phrase ? 'Собери фразу по-уйгурски' : 'Собери слово по-уйгурски';
     body = (
       <>
-        <T variant="eyebrow">{phrase ? 'Собери фразу по-уйгурски' : 'Собери слово по-уйгурски'}</T>
+        <T variant="eyebrow">{eyebrow}</T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={110} height={130} talking={talking} />
           <Bubble style={{ flex: 1, marginBottom: 10 }}><Text style={s.prompt}>{step.word.ruShort}</Text></Bubble>
         </View>
-        <View style={s.slots} accessibilityLabel="Ваш ответ">
+        {ar && (
+          // Буквы в слове соединяются, поэтому показываем собранное слово целиком
+          <Text style={[s.ar, s.arPreview]} accessibilityLabel="Собранное слово">
+            {built.map((id) => step.tiles[id].char).join(phrase ? ' ' : '') || ' '}
+          </Text>
+        )}
+        <View style={[s.slots, ar && { flexDirection: 'row-reverse' }]} accessibilityLabel="Ваш ответ">
           {built.length ? (
             built.map((id, k) => (
               <Pressable key={id} accessibilityRole="button" disabled={!!checked} onPress={() => setBuilt(built.filter((_, j) => j !== k))} style={s.tile}>
-                <Text style={s.tileText}>{step.tiles[id].char}</Text>
+                <Text style={[s.tileText, ar && s.arTile]}>{step.tiles[id].char}</Text>
               </Pressable>
             ))
           ) : (
-            <T variant="muted" style={{ fontSize: 14 }}>{phrase ? 'Нажимай на слова ниже' : 'Нажимай на буквы ниже'}</T>
+            <T variant="muted" style={{ fontSize: 14 }}>
+              {phrase ? 'Нажимай на слова ниже' : 'Нажимай на буквы ниже'}{ar ? ', первая буква справа' : ''}
+            </T>
           )}
         </View>
-        <View style={s.tiles}>
+        <View style={[s.tiles, ar && { flexDirection: 'row-reverse' }]}>
           {step.tiles.map((t) => {
             const used = built.includes(t.id);
             return (
@@ -225,20 +330,20 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
                 disabled={used || !!checked}
                 onPress={() => setBuilt([...built, t.id])}
                 style={[s.tile, used && { opacity: 0 }]}>
-                <Text style={s.tileText}>{t.char}</Text>
+                <Text style={[s.tileText, ar && s.arTile]}>{t.char}</Text>
               </Pressable>
             );
           })}
         </View>
       </>
     );
-    foot = <CheckFoot checked={checked} canCheck={built.length > 0} answer={`${step.word.ug} — ${step.word.ruShort}`} onCheck={check} onNext={next} />;
+    foot = <CheckFoot checked={checked} canCheck={built.length > 0} answer={answerText(step.word)} onCheck={check} onNext={next} />;
   } else {
     const all = matched.length === step.words.length;
     body = (
       <>
         <T variant="eyebrow">Найди пары</T>
-        <T variant="h2">Соедини слово и перевод</T>
+        <T variant="h2">{step.words.some(AR) ? 'Соедини написание и чтение' : 'Соедини слово и перевод'}</T>
         <View style={[ui.row, { alignItems: 'flex-start', gap: 12 }]}>
           <View style={s.col}>
             {step.left.map((w, k) => {
@@ -251,7 +356,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
                   disabled={done}
                   onPress={() => { setMatchLeft(k); speak(w); }}
                   style={[s.opt, matchLeft === k && s.optSel, done && s.optDone]}>
-                  <Text style={[s.optText, { color: colors.blue, fontSize: 19 }, done && { color: colors.okInk }]}>{w.ug}</Text>
+                  <Text style={[s.optText, { color: colors.blue, fontSize: 19 }, AR(w) && s.arOpt, done && { color: colors.okInk }]}>{w.ug}</Text>
                 </Pressable>
               );
             })}
@@ -280,7 +385,9 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
         <Button variant="ok" title="Дальше" onPress={next} />
       </>
     ) : (
-      <T variant="muted" style={{ textAlign: 'center', fontSize: 14 }}>Сначала нажми на уйгурское слово, потом на перевод</T>
+      <T variant="muted" style={{ textAlign: 'center', fontSize: 14 }}>
+        {step.words.some(AR) ? 'Сначала нажми слева на арабскую запись, потом на её пару' : 'Сначала нажми на уйгурское слово, потом на перевод'}
+      </T>
     );
   }
 
@@ -337,8 +444,8 @@ function CheckFoot({ checked, canCheck, answer, onCheck, onNext }: {
   );
 }
 
-function Result({ who, level, words, mistakes, stars, gain }: {
-  who: AvatarId; level: Level; words: number; mistakes: number; stars: number; gain: number;
+function Result({ who, title, unit, count, mistakes, stars, gain }: {
+  who: AvatarId; title: string; unit: string; count: number; mistakes: number; stars: number; gain: number;
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -348,16 +455,18 @@ function Result({ who, level, words, mistakes, stars, gain }: {
         <View style={[ui.row, { gap: 4 }]} accessibilityLabel={`${stars} из 3 звёзд`}>
           {[0, 1, 2].map((k) => <StarIcon key={k} size={54} color={k < stars ? colors.gold : colors.line} />)}
         </View>
-        <T variant="h1" style={{ textAlign: 'center' }}>Уровень «{level.title}» пройден!</T>
+        <T variant="h1" style={{ textAlign: 'center' }}>«{title}» пройден!</T>
         <T variant="muted" style={{ textAlign: 'center' }}>
-          {mistakes ? `Ошибок: ${mistakes}. Слова с ошибками мы повторили в конце урока.` : 'Ни одной ошибки, барикалла!'}
+          {mistakes
+            ? `Ошибок: ${mistakes}. Мы повторили их в конце урока и сохранили для «Работы над ошибками».`
+            : 'Ни одной ошибки, барикалла!'}
         </T>
         <View style={[ui.row, { gap: 10, flexWrap: 'wrap', justifyContent: 'center' }]}>
           <Bubble style={[ui.row, { gap: 6, borderRadius: 14 }]}>
             <ApricotIcon />
             <Text style={[s.pill, { color: '#8A5A00' }]}>+{gain} абрикосов</Text>
           </Bubble>
-          <Bubble style={{ borderRadius: 14 }}><Text style={s.pill}>{words} {level.kind === 'phrases' ? 'новых фраз' : 'новых слов'}</Text></Bubble>
+          {count > 0 && <Bubble style={{ borderRadius: 14 }}><Text style={s.pill}>{count} {unit}</Text></Bubble>}
         </View>
       </ScrollView>
       <View style={[ui.foot, { paddingBottom: insets.bottom + 18 }]}>
@@ -441,4 +550,11 @@ const s = StyleSheet.create({
   footBad: { backgroundColor: colors.redTint, borderColor: colors.redTint },
   pill: { fontFamily: fonts.black, fontSize: 15, color: colors.ink },
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
+  // Арабская графика: свой шрифт, крупнее кириллицы и справа налево
+  ar: { fontFamily: fonts.arabic, writingDirection: 'rtl', color: colors.blue },
+  arBig: { fontFamily: fonts.arabic, writingDirection: 'rtl', fontSize: 40, lineHeight: 64 },
+  arOpt: { fontFamily: fonts.arabic, writingDirection: 'rtl', fontSize: 26, lineHeight: 40 },
+  arTile: { fontFamily: fonts.arabic, fontSize: 26, lineHeight: 40 },
+  arPreview: { fontSize: 38, lineHeight: 64, textAlign: 'center', minHeight: 64 },
+  forms: { fontSize: 34, lineHeight: 58, textAlign: 'center' },
 });

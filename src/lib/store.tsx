@@ -5,6 +5,8 @@ import { createContext, use, useCallback, useEffect, useMemo, useRef, useState, 
 
 import { bundled, fetchRemoteContent, readCachedContent, wordMap } from './content';
 import { starsFor } from './lesson';
+import { mistakeKey } from './review';
+import { isWritingLevel } from './writing';
 import { MAX_HEARTS, XP_FIRST_PASS, XP_REPEAT, XP_STORY, bumpStreak, heartsNow } from './rules';
 import { supabase } from './supabase';
 import type { AvatarId, Course, Progress, Word } from './types';
@@ -40,7 +42,8 @@ async function pushProgress(userId: string, p: Progress) {
     id: userId, name: p.name, avatar: p.avatar, xp: p.xp, streak: p.streak,
     last_active_on: p.lastActiveOn, updated_at: new Date().toISOString(),
   });
-  const levels = Object.entries(p.levels).map(([level_id, v]) => ({
+  // Уровни письменности живут только в приложении, в базе их нет, поэтому их прогресс хранится на устройстве
+  const levels = Object.entries(p.levels).filter(([id]) => !isWritingLevel(id)).map(([level_id, v]) => ({
     user_id: userId, level_id, stars: v.stars, completed_at: v.completedAt,
   }));
   if (levels.length) await supabase.from('level_progress').upsert(levels);
@@ -82,6 +85,11 @@ type Store = {
   update: (fn: (p: Progress) => Progress) => void;
   loseHeart: () => void;
   completeLevel: (levelId: string, mistakes: number) => { stars: number; gain: number };
+  /** Запомнить ошибку для «Работы над ошибками» */
+  noteMistake: (levelId: string, ug: string) => void;
+  /** Слово исправлено: убрать из «Работы над ошибками» */
+  clearMistake: (key: string) => void;
+  completeReview: () => { gain: number };
   completeStory: (storyId: string) => boolean;
   signOut: () => Promise<void>;
 };
@@ -165,6 +173,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           },
         }));
         return { stars, gain };
+      },
+      noteMistake: (levelId, ug) =>
+        update((p) => ({ ...p, mistakes: { ...p.mistakes, [mistakeKey(levelId, ug)]: Date.now() } })),
+      clearMistake: (key) =>
+        update((p) => {
+          if (!p.mistakes?.[key]) return p;
+          const { [key]: _gone, ...rest } = p.mistakes;
+          return { ...p, mistakes: rest };
+        }),
+      completeReview: () => {
+        update((p) => ({ ...p, ...bumpStreak(p, new Date()), xp: p.xp + XP_REPEAT }));
+        return { gain: XP_REPEAT };
       },
       completeStory: (storyId) => {
         if (!progress || progress.stories[storyId]) return false;
