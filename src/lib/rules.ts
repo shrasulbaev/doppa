@@ -75,3 +75,10 @@ export function levelStates(levelIds: string[], done: Record<string, unknown>, u
     done[id] ? 'done' : i === cur ? 'cur' : i < cur || unlockAll ? 'open' : 'lock');
   return { cur, states };
 }
+
+/** Номер «записи дня» из n: меняется в полночь, идёт по кругу. */
+export function dailyIndex(now: Date, n: number): number {
+  if (n <= 0) return 0;
+  const days = daysBetween('2026-01-01', dayKey(now));
+  return ((days % n) + n) % n;
+}
