@@ -7,7 +7,9 @@ import dictionary from '../../content/dictionary.json' with { type: 'json' };
 import { ARABIC_LETTERS, arabicTiles, cyrToArabic, letterForms } from './arabic.ts';
 import { checkBuild, checkChoose } from './lesson.ts';
 import type { Course, Level, Story, Word } from './types.ts';
-import { GLYPHS, checkTrace, firstHalf, resample, type Pt } from './trace.ts';
+import traceItems from '../../content/trace-items.json' with { type: 'json' };
+import traceData from '../../content/trace.json' with { type: 'json' };
+import { checkTrace, halfOf, type Glyph, type Pt } from './trace.ts';
 import { WRITING_LEVELS, WRITING_STAGES, buildWritingLesson, knownArabic, writingItems } from './writing.ts';
 
 const full: Course = {
@@ -86,39 +88,90 @@ test('урок букв сначала знакомит с буквой, пот�
   }
 });
 
-test('у каждой буквы прописи есть эталон', () => {
-  for (const level of WRITING_LEVELS.filter((l) => l.kind === 'trace')) {
-    for (const a of level.letters ?? []) assert.ok(GLYPHS[a], `нет эталона для ${a}`);
+const GLYPHS = traceData as unknown as Record<string, Glyph>;
+
+/** Как ученик пишет эталон: идём по точкам линии от ближайшей к ближайшей, отрываем палец на скачках */
+function writeLike(g: Glyph, shake = 0): Pt[][] {
+  const left = g.line.slice();
+  const strokes: Pt[][] = [];
+  let cur = left.splice(left.findIndex((p) => Math.hypot(p[0] - g.start[0], p[1] - g.start[1]) < 3) || 0, 1)[0];
+  let stroke: Pt[] = [cur];
+  while (left.length) {
+    let k = 0;
+    left.forEach((p, j) => { if (Math.hypot(p[0] - cur[0], p[1] - cur[1]) < Math.hypot(left[k][0] - cur[0], left[k][1] - cur[1])) k = j; });
+    const next = left.splice(k, 1)[0];
+    if (Math.hypot(next[0] - cur[0], next[1] - cur[1]) > 6) { strokes.push(stroke); stroke = []; }
+    stroke.push([next[0] + (stroke.length % 2 ? shake : -shake), next[1]]);
+    cur = next;
+  }
+  strokes.push(stroke);
+  // Обрывки короче точки дописываем к линии, как сделал бы человек одним движением
+  return [...strokes.filter((l) => l.length > 6), ...g.marks.map((m): Pt[] => [m.at, [m.at[0] + 1, m.at[1] + 1]])];
+}
+
+test('у всего, что пишется в прописи, есть эталон из шрифта', () => {
+  const items = WRITING_LEVELS.filter((l) => l.kind === 'trace').flatMap((l) => writingItems(l, full).items.map((w) => w.ug));
+  for (const ug of items) assert.ok(GLYPHS[ug], `нет эталона для ${ug}: запусти scripts/trace-items.mts и trace_templates.py`);
+  assert.deepEqual([...new Set(items)], traceItems);
+  // Все буквы алфавита есть в прописи
+  for (const l of ARABIC_LETTERS) assert.ok(items.includes(l.ar), l.ar);
+});
+
+test('аккуратно написанный эталон проходит проверку на всех шагах, пустое поле — нет', () => {
+  for (const [ug, g] of Object.entries(GLYPHS)) {
+    const ink = writeLike(g, 1.5);
+    for (const mode of ['trace', 'half', 'free'] as const) {
+      const r = checkTrace(g, ink, mode);
+      assert.ok(r.ok, `${ug} (${mode}): ${r.hint} cov=${r.coverage.toFixed(2)} prec=${r.precision.toFixed(2)}`);
+    }
+    assert.equal(checkTrace(g, [], 'free').ok, false);
+    // По памяти рука пишет иначе: уже, с наклоном, в другом месте — это всё ещё верно
+    const hand = ink.map((l) => l.map(([x, y]): Pt => [5 + x * 0.85 + (60 - y) * 0.15, y * 0.95 + 3]));
+    const r = checkTrace(g, hand, 'free');
+    assert.ok(r.ok, `${ug} (по памяти с наклоном): ${r.hint} shape=${r.shape.toFixed(1)}`);
   }
 });
 
-test('проверка прописи: верная буква проходит, каракули и забытые точки — нет', () => {
+test('проверка прописи: забытые точки, точки не там, каракули и половина буквы не проходят', () => {
   const b = GLYPHS['ب'];
-  const line = b.strokes[0];
-  const dot = (p: Pt): Pt[] => [p, [p[0] + 1, p[1] + 1]];
-  // Обвели как нарисовано, с небольшим дрожанием
-  const shaky = line.map(([x, y], k): Pt => [x + (k % 2 ? 2 : -2), y + 1]);
-  assert.ok(checkTrace(b, [shaky, dot(b.dots[0])], 'trace').ok);
-  // Без точки это не «б»
-  const noDot = checkTrace(b, [shaky], 'trace');
+  const ink = writeLike(b, 1.5);
+  const body = ink.slice(0, -1);
+  const noDot = checkTrace(b, body, 'trace');
   assert.equal(noDot.ok, false);
   assert.match(noDot.hint ?? '', /точк/);
-  // Точка не там: у «т» точки сверху
-  assert.equal(checkTrace(GLYPHS['ت'], [shaky, dot(b.dots[0])], 'trace').ok, false);
+  // Точки сверху, как у «т»: это не «б»
+  const t = GLYPHS['ت'];
+  const tDots = t.marks.map((m): Pt[] => [m.at, [m.at[0] + 1, m.at[1] + 1]]);
+  assert.equal(checkTrace(b, [...body, ...tDots], 'trace').ok, false);
+  assert.equal(checkTrace(b, [...ink, ...tDots], 'trace').ok, false);
   // Прямая черта вместо буквы
-  assert.equal(checkTrace(b, [[[90, 50], [10, 50]], dot(b.dots[0])], 'trace').ok, false);
-  // Половина буквы на шаге «Обвести» не засчитывается, а на шаге «Половина» — засчитывается, если дописана вторая часть
-  const second = line.slice(Math.floor(line.length / 2) - 1);
-  assert.equal(checkTrace(b, [second, dot(b.dots[0])], 'trace').ok, false);
-  assert.ok(checkTrace(b, [second, dot(b.dots[0])], 'half').ok);
-  // По памяти: буква мельче и в углу поля — всё равно верно
-  const small = (p: Pt): Pt => [10 + p[0] * 0.5, 40 + p[1] * 0.5];
-  assert.ok(checkTrace(b, [line.map(small), dot(b.dots[0]).map(small)], 'free').ok);
-  assert.equal(checkTrace(b, [], 'free').ok, false);
+  const y = b.base - 3;
+  assert.equal(checkTrace(b, [[[b.w - 10, y], [10, y]], ...ink.slice(-1)], 'trace').ok, false);
+  // Только обведённая половина не засчитывается ни на «Обвести», ни на «Половине»
+  const { shown } = halfOf(b);
+  const firstPart = body.map((l) => l.filter(shown)).filter((l) => l.length > 6);
+  assert.equal(checkTrace(b, [...firstPart, ...ink.slice(-1)], 'trace').ok, false);
+  assert.equal(checkTrace(b, [...firstPart, ...ink.slice(-1)], 'half').ok, false);
+  // По памяти: мельче и в углу поля — всё равно верно
+  const small = (p: Pt): Pt => [10 + p[0] * 0.5, 30 + p[1] * 0.5];
+  assert.ok(checkTrace(b, ink.map((l) => l.map(small)), 'free').ok);
+  // Слово без хамзы над первой буквой — ошибка
+  const ata = GLYPHS['ئاتا'];
+  const ataInk = writeLike(ata);
+  assert.ok(checkTrace(ata, ataInk, 'trace').ok);
+  const hamza = ata.marks.reduce((a, m) => (m.at[0] > a.at[0] ? m : a));
+  const noHamza = ataInk.filter((l) => l[0] !== hamza.at);
+  assert.equal(noHamza.length, ataInk.length - 1);
+  assert.equal(checkTrace(ata, noHamza, 'trace').ok, false);
 });
 
-test('половина буквы — это примерно половина её длины', () => {
-  const half = firstHalf(GLYPHS['ن']).flat();
-  const all = resample(GLYPHS['ن'].strokes[0], 1);
-  assert.ok(Math.abs(half.length - all.length / 2) <= 3);
+test('на шаге «Половина» показана примерно половина, с той стороны, откуда начинают писать', () => {
+  for (const ug of ['ب', 'ا', 'ئاتا', 'بۇ نان']) {
+    const g = GLYPHS[ug];
+    const { shown, axis } = halfOf(g);
+    const part = g.line.filter(shown).length / g.line.length;
+    assert.ok(part > 0.4 && part < 0.6, `${ug}: ${part}`);
+    assert.ok(shown(g.start), `${ug}: начало не в показанной половине`);
+    if (ug === 'ا') assert.equal(axis, 'y');
+  }
 });

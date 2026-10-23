@@ -16,7 +16,8 @@ import { levelWords } from '@/lib/content';
 import { buildLesson, buildPhraseLesson, checkBuild, checkChoose, isPhrase, levelPhrases, shuffle, starsFor, type Step } from '@/lib/lesson';
 import { REVIEW_ID, buildReview, reviewItems } from '@/lib/review';
 import { nextHeartIn } from '@/lib/rules';
-import { GLYPHS, checkTrace, type Pt, type TraceResult } from '@/lib/trace';
+import { GLYPHS } from '@/lib/glyphs';
+import { checkTrace, type Pt, type TraceResult } from '@/lib/trace';
 import { useSpeech } from '@/lib/speech';
 import { useStore } from '@/lib/store';
 import { colors, fonts } from '@/lib/theme';
@@ -31,7 +32,7 @@ export default function LessonScreen() {
   if (levelId === REVIEW_ID) return <ReviewLesson />;
   const writing = isWritingLevel(levelId) ? WRITING_LEVELS.find((l) => l.id === levelId) : undefined;
   if (writing) {
-    const unit = { letters: 'новых букв', trace: 'букв написано', forms: 'форм букв', read: 'слов прочитано', write: 'слов написано', phrases: 'фраз прочитано' }[writing.kind];
+    const unit = { letters: 'новых букв', trace: writing.phrases ? 'фраз написано' : writing.wordIds ? 'слов написано' : 'букв написано', forms: 'форм букв', read: 'слов прочитано', write: 'слов написано', phrases: 'фраз прочитано' }[writing.kind];
     return (
       <Lesson
         key={writing.id}
@@ -347,20 +348,26 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
   } else if (step.kind === 'trace') {
     const glyph = GLYPHS[step.word.ug];
     const mode = step.mode;
-    const name = step.word.hint?.split(',')[0] ?? step.word.ruShort;
+    // Что пишем: букву, слово или связку слов. У буквы подпись — её название, у слова — как читается и перевод.
+    const what = step.word.topic === 'Буквы' ? 'букву' : step.word.ug.includes(' ') ? 'фразу' : 'слово';
+    const name = what === 'букву' ? step.word.hint?.split(',')[0] ?? step.word.ruShort : step.word.ruShort;
+    const sub = what === 'букву' ? null : step.word.hint;
     body = (
       <>
-        <T variant="eyebrow">{{ trace: 'Обведи букву', half: 'Допиши букву', free: 'Напиши букву сам' }[mode]}</T>
+        <T variant="eyebrow">{{ trace: `Обведи ${what}`, half: `Допиши ${what}`, free: `Напиши ${what} сам` }[mode]}</T>
         <View style={[ui.row, { alignItems: 'flex-end' }]}>
           <Avatar who={who} width={90} height={106} talking={talking} />
           <Bubble style={[ui.row, { flex: 1, marginBottom: 8, justifyContent: 'space-between' }]}>
             <View style={{ flexShrink: 1 }}>
               <Text style={s.prompt}>{name}</Text>
+              {sub && <T variant="muted" style={{ fontSize: 14 }}>{sub}</T>}
+              {/* Фраза длинная: арабская запись идёт отдельной строкой, а не сбоку */}
+              {mode !== 'free' && what === 'фразу' && <Text style={[s.ar, { fontSize: 28, lineHeight: 48, textAlign: 'left' }]}>{step.word.ug}</Text>}
               <T variant="muted" style={{ fontSize: 14 }}>
-                {{ trace: 'Веди пальцем от зелёной точки', half: 'Начало уже есть, продолжи и поставь точки', free: 'Напиши по памяти, справа налево' }[mode]}
+                {{ trace: 'Веди пальцем от зелёной точки, потом поставь точки', half: 'Обведи начало и допиши остальное', free: 'Напиши по памяти, справа налево' }[mode]}
               </T>
             </View>
-            {mode !== 'free' && <Text style={[s.ar, { fontSize: 34, lineHeight: 54 }]}>{step.word.ug}</Text>}
+            {mode !== 'free' && what !== 'фразу' && <Text style={[s.ar, { fontSize: 34, lineHeight: 54 }]}>{step.word.ug}</Text>}
           </Bubble>
         </View>
         {glyph ? (
@@ -369,7 +376,7 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
             <Button variant="ghost" title="Стереть" disabled={!ink.length || !!traced?.ok} onPress={() => { setInk([]); setTraced(null); }} />
           </>
         ) : (
-          <T variant="muted">Для этой буквы пропись ещё не готова.</T>
+          <T variant="muted">Для этого пропись ещё не готова.</T>
         )}
       </>
     );
@@ -391,7 +398,7 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
     ) : (
       <>
         <Verdict ok={false} text={traced.hint ?? 'Не похоже'} />
-        <T variant="muted" style={{ fontSize: 14 }}>Красным пунктиром показано, как пишется буква.</T>
+        <T variant="muted" style={{ fontSize: 14 }}>Красным пунктиром показано, как это пишется.</T>
         {mode === 'free'
           ? <Button title="Понятно" onPress={next} />
           : <Button title="Ещё раз" onPress={() => { setInk([]); setTraced(null); }} />}

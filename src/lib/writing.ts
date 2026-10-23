@@ -17,6 +17,8 @@ export type WritingLevel = {
   wordIds?: number[];
   /** Грамматические уровни, из которых берутся фразы */
   phraseLevels?: string[];
+  /** Связки слов для прописи: как читается кириллицей и перевод */
+  phrases?: [string, string][];
   rule?: Rule;
 };
 
@@ -24,11 +26,13 @@ export type WritingStage = { n: number; title: string; about: string };
 
 export const WRITING_STAGES: WritingStage[] = [
   { n: 1, title: 'Буквы', about: 'Как выглядит каждая из 32 букв' },
-  { n: 2, title: 'Пропись', about: 'Пишем буквы пальцем: обвести, дописать, написать самому' },
+  { n: 2, title: 'Пропись: буквы', about: 'Пишем буквы пальцем: обвести, дописать, написать самому' },
   { n: 3, title: 'Формы букв', about: 'Буква меняется в начале, середине и конце слова' },
   { n: 4, title: 'Чтение слов', about: 'Знакомые слова в арабской записи' },
   { n: 5, title: 'Письмо', about: 'Собираем слова из букв' },
-  { n: 6, title: 'Фразы', about: 'Читаем и собираем предложения' },
+  { n: 6, title: 'Пропись: слова', about: 'Пишем слова слитно, буква за буквой' },
+  { n: 7, title: 'Фразы', about: 'Читаем и собираем предложения' },
+  { n: 8, title: 'Пропись: связки', about: 'Пишем два слова подряд' },
 ];
 
 const ar = (s: string) => s.split(' ');
@@ -52,7 +56,12 @@ export const WRITING_LEVELS: WritingLevel[] = [
   { id: 'w-letters-4', stage: 1, title: 'җ, ч, х, д, р, з, ж', kind: 'letters', letters: ar('ج چ خ د ر ز ژ') },
   { id: 'w-letters-5', stage: 1, title: 'с, ш, ғ, ф, қ', kind: 'letters', letters: ar('س ش غ ف ق') },
   { id: 'w-letters-6', stage: 1, title: 'к, г, ң, л, м, һ, в', kind: 'letters', letters: ar('ك گ ڭ ل م ھ ۋ') },
-  { id: 'w-trace-1', stage: 2, title: 'Пишем б, т, н', kind: 'trace', letters: ar('ب ت ن') },
+  { id: 'w-trace-1', stage: 2, title: 'Пишем а, ә, о, у', kind: 'trace', letters: ar('ا ە و ۇ') },
+  { id: 'w-trace-2', stage: 2, title: 'Пишем ө, ү, е, и', kind: 'trace', letters: ar('ۆ ۈ ې ى') },
+  { id: 'w-trace-3', stage: 2, title: 'Пишем б, п, т, н, й', kind: 'trace', letters: ar('ب پ ت ن ي') },
+  { id: 'w-trace-4', stage: 2, title: 'Пишем җ, ч, х, д, р, з, ж', kind: 'trace', letters: ar('ج چ خ د ر ز ژ') },
+  { id: 'w-trace-5', stage: 2, title: 'Пишем с, ш, ғ, ф, қ', kind: 'trace', letters: ar('س ش غ ف ق') },
+  { id: 'w-trace-6', stage: 2, title: 'Пишем к, г, ң, л, м, һ, в', kind: 'trace', letters: ar('ك گ ڭ ل م ھ ۋ') },
   {
     id: 'w-forms-1', stage: 3, title: 'Буквы соединяются', kind: 'forms', letters: ar('ب ت ن ي س ش ق ك ل م'),
     rule: {
@@ -74,8 +83,18 @@ export const WRITING_LEVELS: WritingLevel[] = [
   { id: 'w-write-1', stage: 5, title: 'Короткие слова', kind: 'write', wordIds: [108, 106, 175, 60, 62, 68] },
   { id: 'w-write-2', stage: 5, title: 'Школа', kind: 'write', wordIds: [205, 209, 200, 201, 207, 212] },
   { id: 'w-write-3', stage: 5, title: 'Родина', kind: 'write', wordIds: [275, 276, 284, 52, 256, 257] },
-  { id: 'w-phrases-1', stage: 6, title: 'Это… У меня есть…', kind: 'phrases', phraseLevels: ['ghulja-g1', 'hotan-g2'] },
-  { id: 'w-phrases-2', stage: 6, title: 'О себе', kind: 'phrases', phraseLevels: ['aksu-g1', 'urumqi-g1'] },
+  { id: 'w-trace-words-1', stage: 6, title: 'Семья и еда', kind: 'trace', wordIds: [11, 12, 80, 32, 68, 108] },
+  { id: 'w-trace-words-2', stage: 6, title: 'Вокруг нас', kind: 'trace', wordIds: [106, 175, 81, 82, 60, 62] },
+  { id: 'w-phrases-1', stage: 7, title: 'Это… У меня есть…', kind: 'phrases', phraseLevels: ['ghulja-g1', 'hotan-g2'] },
+  { id: 'w-phrases-2', stage: 7, title: 'О себе', kind: 'phrases', phraseLevels: ['aksu-g1', 'urumqi-g1'] },
+  {
+    id: 'w-trace-phrases-1', stage: 8, title: 'Это…', kind: 'trace',
+    phrases: [['Бу нан', 'Это лепёшка'], ['Бу өй', 'Это дом'], ['Бу чай', 'Это чай'], ['Бу китап', 'Это книга']],
+  },
+  {
+    id: 'w-trace-phrases-2', stage: 8, title: 'Какой? Чей?', kind: 'trace',
+    phrases: [['Ақ ат', 'Белая лошадь'], ['Чоң өй', 'Большой дом'], ['Мән бала', 'Я ребёнок'], ['Атам бар', 'У меня есть отец']],
+  },
 ];
 
 export function isWritingLevel(id: string): boolean {
@@ -127,7 +146,15 @@ export function writingItems(level: WritingLevel, course: Course): WritingItems 
       return { items, pool: ARABIC_LETTERS.map(letterWord) };
     }
     case 'trace': {
-      const items = (level.letters ?? []).map((a) => letterWord(letterByAr(a)!, ARABIC_LETTERS.findIndex((l) => l.ar === a)));
+      // Буквы, слова словаря или связки слов: в ug — арабская запись, по ней ищется эталон прописи
+      const known = knownArabic(course.words);
+      const items = [
+        ...(level.letters ?? []).map((a) => letterWord(letterByAr(a)!, ARABIC_LETTERS.findIndex((l) => l.ar === a))),
+        ...(level.wordIds ?? []).map((id) => words.get(id)).filter((w): w is Word => !!w).map(readWord),
+        ...(level.phrases ?? []).map(([cyr, ru], k): Word => ({
+          ...base, id: -(5000 + k), topic: level.title, ug: cyrToArabic(cyr, known), ruShort: cyr, ru: `${cyr} — ${ru}`, hint: ru,
+        })),
+      ];
       return { items, pool: items };
     }
     case 'forms': {
