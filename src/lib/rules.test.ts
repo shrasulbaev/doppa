@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { HEART_REFILL_MS, MAX_HEARTS, bumpStreak, currentLevelIndex, currentStreak, heartsNow, nextHeartIn } from './rules.ts';
+import { HEART_REFILL_MS, MAX_HEARTS, bumpStreak, currentLevelIndex, currentStreak, heartsNow, levelStates, nextHeartIn } from './rules.ts';
 
 const day = (s: string) => new Date(`${s}T12:00:00`);
 
@@ -33,4 +33,12 @@ test('текущий уровень — первый непройденный', 
   assert.equal(currentLevelIndex(['a', 'b', 'c'], {}), 0);
   assert.equal(currentLevelIndex(['a', 'b', 'c'], { a: 1 }), 1);
   assert.equal(currentLevelIndex(['a', 'b'], { a: 1, b: 1 }), 2);
+});
+
+test('новый уровень позади не откатывает ученика назад, а просто открыт', () => {
+  assert.deepEqual(levelStates(['a', 'b', 'c', 'd'], {}), { cur: 0, states: ['cur', 'lock', 'lock', 'lock'] });
+  assert.deepEqual(levelStates(['a', 'g', 'b', 'c'], { a: 1, b: 1 }), { cur: 3, states: ['done', 'open', 'done', 'cur'] });
+  assert.deepEqual(levelStates(['a', 'g', 'b'], { a: 1, b: 1 }), { cur: 1, states: ['done', 'cur', 'done'] });
+  assert.deepEqual(levelStates(['a', 'b'], { a: 1, b: 1 }).cur, 2);
+  assert.deepEqual(levelStates(['a', 'b', 'c'], { a: 1 }, true).states, ['done', 'cur', 'open']);
 });

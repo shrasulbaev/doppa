@@ -73,4 +73,6 @@ export type Progress = {
   heartsUpdatedAt: number;
   levels: Record<string, { stars: number; completedAt: string }>;
   stories: Record<string, { completedAt: string }>;
+  /** Тестовая учётка: открыты все уровни */
+  unlockAll?: boolean;
 };

@@ -57,3 +57,21 @@ export function currentLevelIndex(levelIds: string[], done: Record<string, unkno
   const i = levelIds.findIndex((id) => !done[id]);
   return i < 0 ? levelIds.length : i;
 }
+
+export type LevelState = 'done' | 'cur' | 'open' | 'lock';
+
+/**
+ * Состояния уровней по всему курсу. Текущий — первый непройденный после самого дальнего пройденного,
+ * поэтому новый уровень, добавленный позади, не откатывает ученика назад, а просто открыт.
+ * С unlockAll (тестовая учётка) открыты все уровни.
+ */
+export function levelStates(levelIds: string[], done: Record<string, unknown>, unlockAll = false): { cur: number; states: LevelState[] } {
+  let last = -1;
+  levelIds.forEach((id, i) => { if (done[id]) last = i; });
+  let cur = levelIds.findIndex((id, i) => i > last && !done[id]);
+  if (cur < 0) cur = levelIds.findIndex((id) => !done[id]);
+  if (cur < 0) cur = levelIds.length;
+  const states = levelIds.map((id, i): LevelState =>
+    done[id] ? 'done' : i === cur ? 'cur' : i < cur || unlockAll ? 'open' : 'lock');
+  return { cur, states };
+}

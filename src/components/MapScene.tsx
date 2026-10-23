@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { G, Polygon, SvgXml } from 'react-native-svg';
 
 import { colors, fonts } from '@/lib/theme';
+import type { LevelState } from '@/lib/rules';
 import type { AvatarId, Level } from '@/lib/types';
 import { Avatar } from './Avatar';
 import { CheckIcon, LockIcon, StarIcon } from './icons';
@@ -13,7 +14,7 @@ const W = 390;
 const XS = [195, 110, 230, 150];
 const OCT = '29,0 71,0 100,29 100,71 71,100 29,100 0,71 0,29';
 
-type NodeState = 'done' | 'cur' | 'lock';
+type NodeState = LevelState;
 
 function layout(count: number) {
   const points = Array.from({ length: count }, (_, i) => ({ x: XS[i % XS.length], y: 70 + i * 130 }));
@@ -36,7 +37,7 @@ function roadPath(points: { x: number; y: number }[], end?: { x: number; y: numb
 
 function sceneXml(points: { x: number; y: number }[], height: number, current: number) {
   const road = roadPath(points, { x: 190, y: height - 150 });
-  const done = roadPath(points.slice(0, Math.min(current, points.length - 1) + 1));
+  const done = roadPath(points.slice(0, current + 1));
   return `<svg viewBox="0 0 ${W} ${height}">` +
     `<path d="${road}" fill="none" stroke="${colors.road}" stroke-width="40" stroke-linecap="round"/>` +
     `<path d="${road}" fill="none" stroke="#F4DFB2" stroke-width="30" stroke-linecap="round"/>` +
@@ -51,6 +52,7 @@ function sceneXml(points: { x: number; y: number }[], height: number, current: n
 const palette: Record<NodeState, { c: string; rim: string; sh: string; fg: string }> = {
   done: { c: colors.blue, rim: colors.gold, sh: colors.blueDark, fg: '#fff' },
   cur: { c: colors.red, rim: colors.gold, sh: colors.redDark, fg: '#fff' },
+  open: { c: colors.tint, rim: colors.blue, sh: colors.blueDark, fg: colors.blue },
   lock: { c: '#EEF1EA', rim: '#C8CFC2', sh: '#B9C2B3', fg: '#6E7F81' },
 };
 
@@ -68,10 +70,9 @@ function Tile({ state, size }: { state: NodeState; size: number }) {
   );
 }
 
-export function MapScene({ levels, current, done, who, nextCity, onOpen }: {
+export function MapScene({ levels, states, who, nextCity, onOpen }: {
   levels: Level[];
-  current: number;
-  done: Record<string, unknown>;
+  states: NodeState[];
   who: AvatarId;
   nextCity?: string;
   onOpen: (level: Level, state: NodeState) => void;
@@ -79,6 +80,8 @@ export function MapScene({ levels, current, done, who, nextCity, onOpen }: {
   const [width, setWidth] = useState(0);
   const { points, height } = layout(levels.length);
   const k = width / W;
+  // Золотая дорожка доходит до последнего пройденного или текущего уровня
+  const current = states.reduce((m, st, i) => (st === 'done' || st === 'cur' ? i : m), -1);
 
   return (
     <View
@@ -88,12 +91,12 @@ export function MapScene({ levels, current, done, who, nextCity, onOpen }: {
         <>
           <SvgXml xml={sceneXml(points, height, current)} width={width} height={height * k} style={StyleSheet.absoluteFill} />
           {levels.map((l, i) => {
-            const state: NodeState = done[l.id] ? 'done' : i === current ? 'cur' : 'lock';
+            const state = states[i] ?? 'lock';
             const size = (state === 'cur' ? 86 : 74) * k;
             const p = points[i];
             const right = p.x < 160;
-            const Icon = state === 'done' ? CheckIcon : state === 'cur' ? StarIcon : LockIcon;
-            const status = state === 'done' ? 'пройден' : state === 'cur' ? 'текущий' : 'закрыт';
+            const Icon = state === 'done' ? CheckIcon : state === 'lock' ? LockIcon : StarIcon;
+            const status = { done: 'пройден', cur: 'текущий', open: 'открыт', lock: 'закрыт' }[state];
             return (
               <View key={l.id} pointerEvents="box-none" style={StyleSheet.absoluteFill}>
                 <Pressable
@@ -122,7 +125,7 @@ export function MapScene({ levels, current, done, who, nextCity, onOpen }: {
                       Уровень {i + 1}
                     </Text>
                     <Text style={[s.title, state === 'cur' && { color: '#fff' }]} numberOfLines={1}>
-                      {l.title}{state === 'cur' ? ' · начать' : ''}
+                      {l.title}{state === 'cur' ? ' · начать' : state === 'open' ? ' · новый' : ''}
                     </Text>
                   </View>
                 </View>

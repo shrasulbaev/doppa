@@ -7,7 +7,7 @@ import { Avatar } from '@/components/Avatar';
 import { Bubble, Button, T, TopBar, ui } from '@/components/ui';
 import { currentStreak } from '@/lib/rules';
 import { useStore } from '@/lib/store';
-import { isDemo } from '@/lib/supabase';
+import { isDemo, testAuth } from '@/lib/supabase';
 import { avatarNames, colors, fonts } from '@/lib/theme';
 
 export default function Profile() {
@@ -41,6 +41,13 @@ export default function Profile() {
           title={`Сменить учителя на ${other === 'alim' ? 'Алима' : 'Райхан'}`}
           onPress={() => update((p) => ({ ...p, avatar: other }))}
         />
+        {testAuth && (
+          <Button
+            variant="ghost"
+            title={progress.unlockAll ? 'Тест: закрыть непройденные уровни' : 'Тест: открыть все уровни'}
+            onPress={() => update((p) => ({ ...p, unlockAll: !p.unlockAll }))}
+          />
+        )}
         <Button variant="ghost" color={colors.redDark} title="Выйти" onPress={signOut} />
       </ScrollView>
     </View>

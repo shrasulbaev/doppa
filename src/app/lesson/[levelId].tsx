@@ -60,7 +60,7 @@ function Lesson({ level, words, pool }: { level: Level; words: Word[]; pool: Wor
 
   if (outOfHearts) return <NoHearts who={who} onExit={() => router.back()} />;
   if (result) return <Result who={who} level={level} words={words.length} mistakes={mistakes} {...result} />;
-  if (!step) return null;
+  if (!step) return <Broken who={who} text="В этом уровне пока нет заданий." />;
 
   function feedback(ok: boolean) {
     Haptics.notificationAsync(ok ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error).catch(() => {});
@@ -362,6 +362,27 @@ function Result({ who, level, words, mistakes, stars, gain }: {
       </ScrollView>
       <View style={[ui.foot, { paddingBottom: insets.bottom + 18 }]}>
         <Button variant="blue" title="Продолжить" onPress={() => router.back()} />
+      </View>
+    </View>
+  );
+}
+
+/** Если урок не открылся, показываем причину вместо белого экрана */
+export function ErrorBoundary({ error }: { error: Error; retry: () => Promise<void> }) {
+  return <Broken who="raihan" text={`Урок не открылся: ${error.message}`} />;
+}
+
+function Broken({ who, text }: { who: AvatarId; text: string }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[ui.screen, { paddingTop: insets.top }]}>
+      <ScrollView contentContainerStyle={[ui.pad, s.center]}>
+        <Avatar who={who} width={150} height={200} />
+        <T variant="h1" style={{ textAlign: 'center' }}>Ой, что-то пошло не так</T>
+        <T variant="muted" style={{ textAlign: 'center' }}>{text} Обновите приложение до последней версии.</T>
+      </ScrollView>
+      <View style={[ui.foot, { paddingBottom: insets.bottom + 18 }]}>
+        <Button variant="blue" title="На карту" onPress={() => router.back()} />
       </View>
     </View>
   );

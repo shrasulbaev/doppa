@@ -6,6 +6,7 @@ import { supabase } from './supabase';
 import type { Course, Level, Story, Word } from './types';
 
 const CACHE_KEY = 'doppa.content.v1';
+const LEVEL_KINDS = ['words', 'phrases'];
 
 export const bundled: Course = {
   words: dictionary as Word[],
@@ -41,7 +42,8 @@ export async function fetchRemoteContent(): Promise<Course | null> {
       ruShort: r.ru_short, pos: r.pos, status: r.review_status, audio: r.audio_file,
     })),
     sections: s.data.map((r) => ({ id: r.id, position: r.position, title: r.title, city: r.city })),
-    levels: l.data.map((r) => ({
+    // Уровни новых видов, которых эта версия приложения не умеет показывать, пропускаем
+    levels: l.data.filter((r) => LEVEL_KINDS.includes(r.kind ?? 'words')).map((r) => ({
       id: r.id, sectionId: r.section_id, position: r.position, title: r.title, wordIds: r.word_ids,
       kind: r.kind ?? 'words', rule: r.rule, items: r.items,
     })),

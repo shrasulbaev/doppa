@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { Bubble, Button, ProgressBar, T, TopBar, ui } from '@/components/ui';
+import { newProgress, useStore } from '@/lib/store';
 import { supabase, testAuth } from '@/lib/supabase';
 import { colors, fonts } from '@/lib/theme';
 
@@ -13,6 +14,7 @@ type Mode = 'phone' | 'email';
 
 export default function SignIn() {
   const insets = useSafeAreaInsets();
+  const { startProgress } = useStore();
   const [mode, setMode] = useState<Mode>('phone');
   const [code, setCode] = useState('+7');
   const [phone, setPhone] = useState('');
@@ -119,9 +121,16 @@ export default function SignIn() {
         <View style={{ gap: 12 }}>
           <Button title={busy ? 'Отправляем…' : 'Получить код'} onPress={send} disabled={busy} />
           {testAuth && (
-            <T variant="muted" style={{ fontSize: 12, textAlign: 'center' }}>
-              Тестовый режим: код никуда не отправляется, на следующем шаге введите 000000.
-            </T>
+            <>
+              <T variant="muted" style={{ fontSize: 12, textAlign: 'center' }}>
+                Тестовый режим: код никуда не отправляется, на следующем шаге введите 000000.
+              </T>
+              <Button
+                variant="ghost"
+                title="Тестовая учётка: все уровни открыты"
+                onPress={() => startProgress({ ...newProgress('Тестер', 'alim'), unlockAll: true })}
+              />
+            </>
           )}
         </View>
       </ScrollView>
