@@ -10,11 +10,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { ApricotIcon, CheckIcon, CloseIcon, PomegranateIcon, StarIcon } from '@/components/icons';
+import { TracePad } from '@/components/TracePad';
 import { Bubble, Button, ProgressBar, SpeakButton, T, TopBar, ui } from '@/components/ui';
 import { levelWords } from '@/lib/content';
 import { buildLesson, buildPhraseLesson, checkBuild, checkChoose, isPhrase, levelPhrases, shuffle, starsFor, type Step } from '@/lib/lesson';
 import { REVIEW_ID, buildReview, reviewItems } from '@/lib/review';
 import { nextHeartIn } from '@/lib/rules';
+import { GLYPHS, checkTrace, type Pt, type TraceResult } from '@/lib/trace';
 import { useSpeech } from '@/lib/speech';
 import { useStore } from '@/lib/store';
 import { colors, fonts } from '@/lib/theme';
@@ -29,7 +31,7 @@ export default function LessonScreen() {
   if (levelId === REVIEW_ID) return <ReviewLesson />;
   const writing = isWritingLevel(levelId) ? WRITING_LEVELS.find((l) => l.id === levelId) : undefined;
   if (writing) {
-    const unit = { letters: 'новых букв', forms: 'форм букв', read: 'слов прочитано', write: 'слов написано', phrases: 'фраз прочитано' }[writing.kind];
+    const unit = { letters: 'новых букв', trace: 'букв написано', forms: 'форм букв', read: 'слов прочитано', write: 'слов написано', phrases: 'фраз прочитано' }[writing.kind];
     return (
       <Lesson
         key={writing.id}
@@ -124,6 +126,8 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
   const [flash, setFlash] = useState<number | null>(null);
   const [result, setResult] = useState<null | { stars: number; gain: number }>(null);
   const [outOfHearts, setOutOfHearts] = useState(hearts <= 0);
+  const [ink, setInk] = useState<Pt[][]>([]);
+  const [traced, setTraced] = useState<TraceResult | null>(null);
   const introduced = new Set(steps.filter((s) => s.kind === 'intro').map((s) => (s.kind === 'intro' ? s.word.ug : '')));
 
   const step = steps[i];
@@ -145,7 +149,7 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
   function miss(s: Step) {
     setMistakes((m) => m + 1);
     loseHeart();
-    if (s.kind === 'choose' || s.kind === 'build') onMiss(s.word);
+    if (s.kind === 'choose' || s.kind === 'build' || s.kind === 'trace') onMiss(s.word);
     setSteps((all) => [...all, again(s)]);
   }
 
@@ -174,6 +178,8 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
     setMatchLeft(null);
     setMatched([]);
     setFlash(null);
+    setInk([]);
+    setTraced(null);
     if (i + 1 >= steps.length) setResult(onFinish(mistakes));
     else setI(i + 1);
   }
@@ -338,6 +344,59 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
       </>
     );
     foot = <CheckFoot checked={checked} canCheck={built.length > 0} answer={answerText(step.word)} onCheck={check} onNext={next} />;
+  } else if (step.kind === 'trace') {
+    const glyph = GLYPHS[step.word.ug];
+    const mode = step.mode;
+    const name = step.word.hint?.split(',')[0] ?? step.word.ruShort;
+    body = (
+      <>
+        <T variant="eyebrow">{{ trace: 'Обведи букву', half: 'Допиши букву', free: 'Напиши букву сам' }[mode]}</T>
+        <View style={[ui.row, { alignItems: 'flex-end' }]}>
+          <Avatar who={who} width={90} height={106} talking={talking} />
+          <Bubble style={[ui.row, { flex: 1, marginBottom: 8, justifyContent: 'space-between' }]}>
+            <View style={{ flexShrink: 1 }}>
+              <Text style={s.prompt}>{name}</Text>
+              <T variant="muted" style={{ fontSize: 14 }}>
+                {{ trace: 'Веди пальцем от зелёной точки', half: 'Начало уже есть, продолжи и поставь точки', free: 'Напиши по памяти, справа налево' }[mode]}
+              </T>
+            </View>
+            {mode !== 'free' && <Text style={[s.ar, { fontSize: 34, lineHeight: 54 }]}>{step.word.ug}</Text>}
+          </Bubble>
+        </View>
+        {glyph ? (
+          <>
+            <TracePad glyph={glyph} mode={mode} ink={ink} onInk={setInk} ghost={!!traced && !traced.ok} disabled={!!traced} />
+            <Button variant="ghost" title="Стереть" disabled={!ink.length || !!traced?.ok} onPress={() => { setInk([]); setTraced(null); }} />
+          </>
+        ) : (
+          <T variant="muted">Для этой буквы пропись ещё не готова.</T>
+        )}
+      </>
+    );
+    const verify = () => {
+      if (!glyph) return next();
+      const r = checkTrace(glyph, ink, mode);
+      feedback(r.ok);
+      setTraced(r);
+      // Ошибкой считаем только письмо по памяти, обводить и дописывать можно сколько угодно
+      if (!r.ok && mode === 'free') miss(step);
+    };
+    foot = !traced ? (
+      <Button title="Проверить" disabled={!!glyph && !ink.length} onPress={verify} />
+    ) : traced.ok ? (
+      <>
+        <Verdict ok text={PRAISE[i % PRAISE.length]} />
+        <Button variant="ok" title="Дальше" onPress={next} />
+      </>
+    ) : (
+      <>
+        <Verdict ok={false} text={traced.hint ?? 'Не похоже'} />
+        <T variant="muted" style={{ fontSize: 14 }}>Красным пунктиром показано, как пишется буква.</T>
+        {mode === 'free'
+          ? <Button title="Понятно" onPress={next} />
+          : <Button title="Ещё раз" onPress={() => { setInk([]); setTraced(null); }} />}
+      </>
+    );
   } else {
     const all = matched.length === step.words.length;
     body = (
@@ -391,7 +450,8 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
     );
   }
 
-  const footTone = checked ? (checked.ok ? s.footGood : s.footBad) : step.kind === 'match' && matched.length === step.words.length ? s.footGood : null;
+  const verdict = checked ?? traced;
+  const footTone = verdict ? (verdict.ok ? s.footGood : s.footBad) : step.kind === 'match' && matched.length === step.words.length ? s.footGood : null;
 
   return (
     <View style={[ui.screen, { paddingTop: insets.top }]}>
@@ -402,7 +462,8 @@ function Lesson({ title, unit, count, make, onMiss, onFinish }: {
           <Text style={s.hearts}>{hearts}</Text>
         </View>
       </TopBar>
-      <ScrollView contentContainerStyle={[ui.pad, { gap: 16 }]}>{body}</ScrollView>
+      {/* Пока пишем пальцем, экран не прокручивается, иначе прокрутка перехватит штрих */}
+      <ScrollView scrollEnabled={step.kind !== 'trace'} contentContainerStyle={[ui.pad, { gap: 16 }]}>{body}</ScrollView>
       <View style={[ui.foot, { paddingBottom: insets.bottom + 18 }, footTone]}>{foot}</View>
     </View>
   );

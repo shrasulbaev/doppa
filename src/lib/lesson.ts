@@ -8,7 +8,9 @@ export type Step =
   | { kind: 'rule'; rule: Rule; script?: 'arabic' }
   /** Сборка слова из букв или, для фраз, предложения из слов */
   | { kind: 'build'; word: Word; tiles: { id: number; char: string }[] }
-  | { kind: 'match'; words: Word[]; left: Word[]; right: Word[] };
+  | { kind: 'match'; words: Word[]; left: Word[]; right: Word[] }
+  /** Пропись: написать букву пальцем — обвести, дописать половину или написать самому */
+  | { kind: 'trace'; word: Word; mode: 'trace' | 'half' | 'free' };
 
 export type Rng = () => number;
 
