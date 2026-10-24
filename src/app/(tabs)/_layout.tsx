@@ -20,8 +20,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="alphabet"
         options={{
-          title: 'Алфавит',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontFamily: fonts.black, fontSize: 18, lineHeight: 24 }}>Әә</Text>,
+          title: 'Письмо',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontFamily: fonts.arabic, fontSize: 20, lineHeight: 28 }}>ئە</Text>,
         }}
       />
       <Tabs.Screen name="history" options={{ title: 'История', tabBarIcon: ({ color }) => <BookIcon color={String(color)} /> }} />

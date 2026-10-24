@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { HEART_REFILL_MS, MAX_HEARTS, bumpStreak, currentLevelIndex, currentStreak, heartsNow, levelStates, nextHeartIn } from './rules.ts';
+import { HEART_REFILL_MS, MAX_HEARTS, bumpStreak, dailyIndex, currentLevelIndex, currentStreak, heartsNow, levelStates, nextHeartIn } from './rules.ts';
 
 const day = (s: string) => new Date(`${s}T12:00:00`);
 
@@ -41,4 +41,11 @@ test('новый уровень позади не откатывает учен�
   assert.deepEqual(levelStates(['a', 'g', 'b'], { a: 1, b: 1 }), { cur: 1, states: ['done', 'cur', 'done'] });
   assert.deepEqual(levelStates(['a', 'b'], { a: 1, b: 1 }).cur, 2);
   assert.deepEqual(levelStates(['a', 'b', 'c'], { a: 1 }, true).states, ['done', 'cur', 'open']);
+});
+
+test('пословица дня меняется раз в сутки и идёт по кругу', () => {
+  assert.equal(dailyIndex(new Date('2026-10-23T00:05:00'), 24), dailyIndex(new Date('2026-10-23T23:55:00'), 24));
+  assert.equal((dailyIndex(day('2026-10-23'), 24) + 1) % 24, dailyIndex(day('2026-10-24'), 24));
+  assert.equal(dailyIndex(day('2025-06-01'), 24) >= 0, true);
+  assert.equal(dailyIndex(day('2026-10-23'), 0), 0);
 });

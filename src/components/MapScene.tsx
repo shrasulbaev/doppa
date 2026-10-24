@@ -1,4 +1,5 @@
-// Карта раздела: дорога Шёлкового пути, восьмиугольные плитки уровней и декорации Кашгара.
+// Карта раздела: дорога Шёлкового пути, восьмиугольные плитки уровней и декорации города.
+// Разделы стоят друг под другом, дорога одного переходит в дорогу следующего.
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { G, Polygon, SvgXml } from 'react-native-svg';
@@ -8,17 +9,21 @@ import type { LevelState } from '@/lib/rules';
 import type { AvatarId, Level } from '@/lib/types';
 import { Avatar } from './Avatar';
 import { CheckIcon, LockIcon, StarIcon } from './icons';
-import { kashgarDecor } from './sceneArt';
+import type { CityScene } from './cityArt';
 
 const W = 390;
 const XS = [195, 110, 230, 150];
+/** Сверху раздела место под табличку города */
+const TOP = 150;
+const STEP = 130;
+const DECOR_TOP = 100;
 const OCT = '29,0 71,0 100,29 100,71 71,100 29,100 0,71 0,29';
 
 type NodeState = LevelState;
 
 function layout(count: number) {
-  const points = Array.from({ length: count }, (_, i) => ({ x: XS[i % XS.length], y: 70 + i * 130 }));
-  const height = Math.max(600, 70 + count * 130 + 140);
+  const points = Array.from({ length: count }, (_, i) => ({ x: XS[i % XS.length], y: TOP + i * STEP }));
+  const height = Math.max(600, TOP + count * STEP + 20);
   return { points, height };
 }
 
@@ -31,21 +36,24 @@ function roadPath(points: { x: number; y: number }[], end?: { x: number; y: numb
     const b = all[i];
     d += ` C${a.x} ${a.y + 70} ${b.x} ${b.y - 70} ${b.x} ${b.y}`;
   }
-  if (end) d += ` L${end.x} ${end.y + 200}`;
+  if (end) d += ` L${end.x} ${end.y + 40}`;
   return d;
 }
 
-function sceneXml(points: { x: number; y: number }[], height: number, current: number) {
-  const road = roadPath(points, { x: 190, y: height - 150 });
+function sceneXml(points: { x: number; y: number }[], height: number, current: number, scene: CityScene) {
+  // Дорога уходит вниз к первому уровню следующего города
+  const road = roadPath(points, { x: XS[0], y: height });
   const done = roadPath(points.slice(0, current + 1));
   return `<svg viewBox="0 0 ${W} ${height}">` +
+    `<rect width="${W}" height="${height}" fill="${scene.ground}"/>` +
     `<path d="${road}" fill="none" stroke="${colors.road}" stroke-width="40" stroke-linecap="round"/>` +
     `<path d="${road}" fill="none" stroke="#F4DFB2" stroke-width="30" stroke-linecap="round"/>` +
     `<path d="${road}" fill="none" stroke="#D9B26A" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>` +
     (current > 0 ? `<path d="${done}" fill="none" stroke="${colors.gold}" stroke-width="6" stroke-linecap="round"/>` : '') +
-    // Декорации повторяются каждые 600 единиц, через раз зеркально
-    Array.from({ length: Math.ceil(height / 600) }, (_, k) =>
-      `<g transform="translate(${k % 2 ? W : 0} ${k * 600}) scale(${k % 2 ? -1 : 1} 1)">${kashgarDecor}</g>`).join('') +
+    // Декорации начинаются под табличкой города и повторяются каждые 600 единиц, через раз зеркально.
+    // Неполный блок внизу не рисуем, иначе рисунки обрезаются на границе со следующим городом.
+    Array.from({ length: Math.max(1, Math.floor((height - DECOR_TOP + 60) / 600)) }, (_, k) =>
+      `<g transform="translate(${k % 2 ? W : 0} ${DECOR_TOP + k * 600}) scale(${k % 2 ? -1 : 1} 1)">${scene.decor}</g>`).join('') +
     '</svg>';
 }
 
@@ -70,11 +78,23 @@ function Tile({ state, size }: { state: NodeState; size: number }) {
   );
 }
 
-export function MapScene({ levels, states, who, nextCity, onOpen }: {
+export type CitySign = { eyebrow: string; title: string; tone: 'blue' | 'ok' | 'lock' };
+/** Учитель стоит напротив уровня index и говорит фразу из его темы */
+export type Teacher = { index: number; ug: string; ru?: string };
+
+const signTone = {
+  blue: { bg: colors.blue, sh: colors.blueDark, fg: '#fff' },
+  ok: { bg: colors.ok, sh: colors.okDark, fg: '#fff' },
+  lock: { bg: colors.card, sh: colors.line, fg: colors.muted },
+};
+
+export function MapScene({ levels, states, who, scene, sign, teacher, onOpen }: {
   levels: Level[];
   states: NodeState[];
   who: AvatarId;
-  nextCity?: string;
+  scene: CityScene;
+  sign: CitySign;
+  teacher?: Teacher;
   onOpen: (level: Level, state: NodeState) => void;
 }) {
   const [width, setWidth] = useState(0);
@@ -89,7 +109,7 @@ export function MapScene({ levels, states, who, nextCity, onOpen }: {
       onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       {width > 0 && (
         <>
-          <SvgXml xml={sceneXml(points, height, current)} width={width} height={height * k} style={StyleSheet.absoluteFill} />
+          <SvgXml xml={sceneXml(points, height, current, scene)} width={width} height={height * k} style={StyleSheet.absoluteFill} />
           {levels.map((l, i) => {
             const state = states[i] ?? 'lock';
             const size = (state === 'cur' ? 86 : 74) * k;
@@ -132,15 +152,35 @@ export function MapScene({ levels, states, who, nextCity, onOpen }: {
               </View>
             );
           })}
-          <View pointerEvents="none" style={[s.friend, { left: 0.81 * width, top: 0.23 * width * (600 / W), width: 0.17 * width }]}>
-            <Text style={s.hello}>Салам!</Text>
-            <Avatar who={who} width={0.14 * width} height={0.14 * width * 1.6} framed={false} />
-          </View>
-          {nextCity && (
-            <View pointerEvents="none" style={[s.next, { top: (height - 70) * k }]}>
-              <Text style={s.nextText}>Дальше: {nextCity}</Text>
+          <View pointerEvents="none" style={[s.signPos, { top: 26 * k }]}>
+            <View style={[s.sign, { backgroundColor: signTone[sign.tone].bg, shadowColor: signTone[sign.tone].sh }]}>
+              <Text style={[s.signEyebrow, { color: signTone[sign.tone].fg }]} numberOfLines={1}>{sign.eyebrow}</Text>
+              <Text style={[s.signTitle, { color: signTone[sign.tone].fg }]} numberOfLines={2}>{sign.title}</Text>
             </View>
-          )}
+          </View>
+          {teacher && points[teacher.index] && (() => {
+            const p = points[teacher.index];
+            // Плитки слева подписаны справа, поэтому учитель встаёт с другой стороны
+            const onRight = p.x >= 160;
+            const avatarW = 0.14 * width;
+            const boxW = 0.3 * width;
+            return (
+              <View
+                pointerEvents="none"
+                style={[s.friend, {
+                  width: boxW,
+                  left: onRight ? width - boxW - 0.01 * width : 0.01 * width,
+                  // Не залезаем на табличку города над первым уровнем
+                  top: Math.max(118 * k, p.y * k - avatarW * 1.6 - 18 * k),
+                }]}>
+                <View style={s.hello}>
+                  <Text style={s.helloUg} numberOfLines={2}>{teacher.ug}</Text>
+                  {teacher.ru ? <Text style={s.helloRu} numberOfLines={1}>{teacher.ru}</Text> : null}
+                </View>
+                <Avatar who={who} width={avatarW} height={avatarW * 1.6} framed={false} />
+              </View>
+            );
+          })()}
         </>
       )}
     </View>
@@ -160,13 +200,14 @@ const s = StyleSheet.create({
   num: { fontFamily: fonts.black, fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', color: colors.muted },
   title: { fontFamily: fonts.black, fontSize: 15, color: colors.ink },
   friend: { position: 'absolute', alignItems: 'center', gap: 4 },
-  hello: {
-    fontFamily: fonts.bold, fontSize: 14, backgroundColor: colors.card, borderRadius: 12, overflow: 'hidden',
-    paddingHorizontal: 9, paddingVertical: 5, color: colors.ink,
+  hello: { backgroundColor: colors.card, borderRadius: 12, paddingHorizontal: 9, paddingVertical: 5, alignItems: 'center' },
+  helloUg: { fontFamily: fonts.black, fontSize: 14, color: colors.ink, textAlign: 'center' },
+  helloRu: { fontFamily: fonts.semi, fontSize: 11, color: colors.muted },
+  signPos: { position: 'absolute', left: 20, right: 20 },
+  sign: {
+    borderRadius: 20, paddingHorizontal: 18, paddingVertical: 12, gap: 2,
+    shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 0, elevation: 4,
   },
-  next: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  nextText: {
-    fontFamily: fonts.black, fontSize: 14, color: colors.muted, backgroundColor: colors.card, borderRadius: 12,
-    overflow: 'hidden', paddingHorizontal: 12, paddingVertical: 5,
-  },
+  signEyebrow: { fontFamily: fonts.black, fontSize: 13, letterSpacing: 0.7, textTransform: 'uppercase', opacity: 0.9 },
+  signTitle: { fontFamily: fonts.black, fontSize: 19 },
 });
