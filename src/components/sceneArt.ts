@@ -21,15 +21,35 @@ export const kashgarDecor = [
 ].join('');
 
 // Обложки историй, система координат 320 × 150
-export const storyArtBg = { doppa: '#FBE3E6', book: '#FDF0D6', music: '#E2F0FB' } as const;
+export const storyArtBg = {
+  doppa: '#FBE3E6', book: '#FDF0D6', music: '#E2F0FB', scroll: '#F6ECD9', queen: '#F3E4F4',
+  karez: '#F8E6C8', lake: '#E4EEF7', caravan: '#FBE7C9', letters: '#E5F1E4',
+} as const;
 
 const storyArtBody = {
   doppa: '<path d="M110 120 L124 52 Q160 38 196 52 L210 120 Q160 108 110 120Z" fill="#1F2A44"/><path d="M114 108 Q160 96 206 108" stroke="#F2B33D" stroke-width="5" fill="none"/><ellipse cx="140" cy="78" rx="8" ry="14" fill="none" stroke="#FFFFFF" stroke-width="3.5" transform="rotate(-20 140 78)"/><ellipse cx="180" cy="78" rx="8" ry="14" fill="none" stroke="#FFFFFF" stroke-width="3.5" transform="rotate(20 180 78)"/><circle cx="160" cy="62" r="4" fill="#C8384A"/>',
   book: '<path d="M160 48 Q130 36 96 42 L96 124 Q130 118 160 130Z" fill="#FFFFFF" stroke="#B9865A" stroke-width="3"/><path d="M160 48 Q190 36 224 42 L224 124 Q190 118 160 130Z" fill="#FFFFFF" stroke="#B9865A" stroke-width="3"/><g stroke="#8A5A3B" stroke-width="2.5" stroke-linecap="round"><path d="M108 60 Q128 56 148 62M108 74 Q128 70 148 76M108 88 Q128 84 148 90M108 102 Q128 98 148 104"/></g><circle cx="192" cy="82" r="22" fill="none" stroke="#1872B8" stroke-width="3"/><path d="M174 82 H210 M192 64 V100" stroke="#1872B8" stroke-width="2"/>',
   music: '<rect x="126" y="14" width="12" height="96" rx="4" fill="#8A5A3B" transform="rotate(30 132 110)"/><circle cx="132" cy="112" r="24" fill="#C98A5B"/><circle cx="132" cy="112" r="13" fill="#F4DFB2"/><g fill="#5A3420"><circle cx="172" cy="40" r="4"/><circle cx="164" cy="50" r="4"/></g><circle cx="222" cy="92" r="26" fill="#F4DFB2" stroke="#B0744A" stroke-width="5"/><g fill="#B0744A"><circle cx="222" cy="66" r="3"/><circle cx="246" cy="92" r="3"/><circle cx="222" cy="118" r="3"/><circle cx="198" cy="92" r="3"/></g>',
+  // свиток поэмы и калам
+  scroll: '<rect x="96" y="34" width="128" height="88" rx="4" fill="#FFFBF0" stroke="#B9865A" stroke-width="3"/><rect x="86" y="28" width="148" height="12" rx="6" fill="#C98A5B"/><rect x="86" y="116" width="148" height="12" rx="6" fill="#C98A5B"/><g stroke="#8A5A3B" stroke-width="2.5" stroke-linecap="round"><path d="M116 56 Q138 52 160 57 M170 56 Q188 52 206 57 M116 72 Q138 68 160 73 M170 72 Q188 68 206 73 M116 88 Q138 84 160 89 M170 88 Q188 84 206 89 M116 104 Q138 100 160 105 M170 104 Q188 100 206 105"/></g><path d="M244 30 L262 112" stroke="#5A3420" stroke-width="4" stroke-linecap="round"/><path d="M262 112 L266 124 L258 116Z" fill="#1F2A44"/>',
+  // корона ханши и рабаб
+  queen: '<path d="M106 96 L112 54 L130 76 L146 44 L160 72 L174 44 L190 76 L208 54 L214 96Z" fill="#F2B33D" stroke="#C98A1B" stroke-width="3" stroke-linejoin="round"/><rect x="104" y="96" width="112" height="14" rx="4" fill="#E2A94E"/><g fill="#C8384A"><circle cx="160" cy="103" r="5"/><circle cx="130" cy="103" r="4"/><circle cx="190" cy="103" r="4"/></g><g fill="#1872B8"><circle cx="112" cy="52" r="5"/><circle cx="146" cy="42" r="5"/><circle cx="174" cy="42" r="5"/><circle cx="208" cy="52" r="5"/></g><g fill="#8C5CC4"><circle cx="248" cy="62" r="3.5"/><circle cx="262" cy="50" r="3.5"/></g><path d="M252 64 L252 40 L266 36 L266 60" fill="none" stroke="#8C5CC4" stroke-width="2.5"/>',
+  // горы со снегом, колодцы и подземный канал к винограднику
+  karez: '<path d="M0 70 L40 26 L72 58 L104 20 L150 70Z" fill="#B9A58C"/><path d="M30 37 L40 26 L50 37 Q40 42 30 37Z M94 31 L104 20 L115 32 Q104 37 94 31Z" fill="#FFFFFF"/><rect x="0" y="70" width="320" height="80" fill="#E8C994"/><path d="M40 104 Q160 112 262 118" stroke="#4BA3E3" stroke-width="7" fill="none" stroke-linecap="round"/><g fill="#C69A5E"><ellipse cx="96" cy="70" rx="9" ry="3.5"/><ellipse cx="150" cy="70" rx="9" ry="3.5"/><ellipse cx="204" cy="70" rx="9" ry="3.5"/></g><g stroke="#C69A5E" stroke-width="2" stroke-dasharray="3 3"><path d="M96 72 V106 M150 72 V109 M204 72 V113"/></g><g transform="translate(240,30)"><rect x="6" y="20" width="4" height="40" fill="#8A5A3B"/><rect x="52" y="20" width="4" height="40" fill="#8A5A3B"/><rect x="2" y="16" width="58" height="5" rx="2.5" fill="#A06B45"/><g fill="#57B36F"><ellipse cx="14" cy="14" rx="12" ry="8"/><ellipse cx="32" cy="11" rx="13" ry="8"/><ellipse cx="50" cy="14" rx="12" ry="8"/></g><g fill="#6B3FA0"><circle cx="26" cy="26" r="3.5"/><circle cx="32" cy="26" r="3.5"/><circle cx="29" cy="32" r="3.5"/></g></g>',
+  // впадина, соляное озеро и луна
+  lake: '<circle cx="250" cy="36" r="18" fill="#FFFFFF"/><circle cx="258" cy="31" r="15" fill="#E4EEF7"/><path d="M0 60 Q80 66 110 96 L210 96 Q240 66 320 60 L320 150 L0 150Z" fill="#D9B98A"/><ellipse cx="160" cy="104" rx="70" ry="13" fill="#FFFFFF" stroke="#C9D7E3" stroke-width="2"/><ellipse cx="160" cy="104" rx="38" ry="6" fill="#BFD9EE"/>',
+  // караван верблюдов в пустыне
+  caravan: '<circle cx="268" cy="34" r="16" fill="#F2B33D"/><path d="M0 112 Q80 92 160 108 Q240 124 320 104 L320 150 L0 150Z" fill="#E8C994"/>' +
+    [60, 150, 240].map((x) => `<g transform="translate(${x},62)"><path d="M4 22 Q10 2 22 8 Q30 -2 38 10 Q42 18 46 14 L50 2 L60 4 L58 10 L52 12 L48 26 Q44 30 40 28 L8 28Z" fill="#C98A5B"/><path d="M10 28 L8 48 M16 28 L16 48 M34 28 L34 48 M40 28 L42 48" stroke="#A06B45" stroke-width="4" stroke-linecap="round"/><rect x="18" y="6" width="14" height="8" rx="2" fill="#C8384A"/></g>`).join(''),
+  // письмо сверху вниз и арабица
+  letters: '<rect x="70" y="20" width="70" height="112" rx="6" fill="#FFFBF0" stroke="#B9865A" stroke-width="3"/><g stroke="#5A3420" stroke-width="3" stroke-linecap="round" fill="none"><path d="M92 34 V60 Q92 66 98 66 M92 74 V96 Q96 102 100 96 M92 104 V120"/><path d="M118 34 V52 Q122 58 118 64 V86 Q114 92 118 98 V120"/></g><rect x="160" y="40" width="96" height="74" rx="6" fill="#FFFFFF" stroke="#4FA0DC" stroke-width="3"/><text x="208" y="90" text-anchor="middle" font-size="32" fill="#1872B8" font-family="serif">ئۇيغۇر</text>',
 };
 
-export function storyArtXml(kind: keyof typeof storyArtBody): string {
+export type StoryArtKind = keyof typeof storyArtBody;
+
+/** Обложка истории. Если в базе появилась картинка, которой эта версия не знает, показываем книгу. */
+export function storyArtXml(kind: string): string {
+  const body = storyArtBody[kind as StoryArtKind] ?? storyArtBody.book;
   return '<svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">' +
-    '<g opacity=".5" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M-10 150 Q30 90 70 150M60 150 Q100 90 140 150M180 150 Q220 90 260 150M250 150 Q290 90 330 150"/></g>' + storyArtBody[kind] + '</svg>';
+    '<g opacity=".5" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M-10 150 Q30 90 70 150M60 150 Q100 90 140 150M180 150 Q220 90 260 150M250 150 Q290 90 330 150"/></g>' + body + '</svg>';
 }

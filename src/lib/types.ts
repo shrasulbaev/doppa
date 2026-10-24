@@ -53,7 +53,8 @@ export type Story = {
   title: string;
   audience: string;
   minutes: number;
-  art: 'doppa' | 'book' | 'music';
+  /** Обложка из sceneArt; незнакомая этой версии приложения показывается книгой */
+  art: string;
   wordId: number;
   paragraphs: string[];
   quiz: QuizQuestion[];
