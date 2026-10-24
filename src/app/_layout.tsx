@@ -7,9 +7,13 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import proverbs from '../../content/proverbs.json';
 import { Toast } from '@/components/ui';
+import { scheduleReminders } from '@/lib/notify';
+import { planReminders } from '@/lib/reminders';
+import { currentStreak } from '@/lib/rules';
 import { StoreProvider, useStore } from '@/lib/store';
-import { colors } from '@/lib/theme';
+import { avatarNames, colors } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -31,6 +35,15 @@ function Root() {
   useEffect(() => {
     if (show) SplashScreen.hideAsync().catch(() => {});
   }, [show]);
+
+  // Пословица утром и напоминание вечером на неделю вперёд. Пересчитываем при каждом запуске и после урока.
+  const avatar = progress?.avatar;
+  const lastActiveOn = progress?.lastActiveOn ?? null;
+  const streak = progress ? currentStreak(progress, new Date()) : 0;
+  useEffect(() => {
+    if (!avatar) return;
+    scheduleReminders(planReminders({ now: new Date(), proverbs, lastActiveOn, streak, teacher: avatarNames[avatar] }));
+  }, [avatar, lastActiveOn, streak]);
 
   if (!show) return null;
   const registered = !!progress;
