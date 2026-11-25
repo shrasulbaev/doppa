@@ -1,5 +1,5 @@
 # Собирает iOS-версию на серверах Expo (EAS) и отправляет её в TestFlight.
-# Запуск: вкладка Actions → «iOS TestFlight» → Run workflow.
+# Запуск: вкладка Actions → «iOS TestFlight» → Run workflow или тег вида ios-1 на нужном коммите.
 #
 # Нужны секреты репозитория (Settings → Secrets and variables → Actions):
 #   EXPO_TOKEN        — токен доступа Expo (expo.dev → Account settings → Access tokens)
@@ -12,6 +12,8 @@ name: iOS TestFlight
 
 on:
   workflow_dispatch:
+  push:
+    tags: ['ios-*']
 
 jobs:
   build:
