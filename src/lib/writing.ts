@@ -1,6 +1,7 @@
 // Курс арабской графики: от букв до предложений. Уровни строятся из алфавита,
 // словаря и фраз грамматических уровней, поэтому отдельного контента не требуют.
 import { ARABIC_LETTERS, cyrToArabic, letterByAr, letterForms, type ArabicLetter } from './arabic.ts';
+import { phraseAudio } from './audio.ts';
 import { buildSteps, type Rng, type Step } from './lesson.ts';
 import type { Course, Rule, Word } from './types';
 
@@ -152,7 +153,7 @@ export function writingItems(level: WritingLevel, course: Course): WritingItems 
         ...(level.letters ?? []).map((a) => letterWord(letterByAr(a)!, ARABIC_LETTERS.findIndex((l) => l.ar === a))),
         ...(level.wordIds ?? []).map((id) => words.get(id)).filter((w): w is Word => !!w).map(readWord),
         ...(level.phrases ?? []).map(([cyr, ru], k): Word => ({
-          ...base, id: -(5000 + k), topic: level.title, ug: cyrToArabic(cyr, known), ruShort: cyr, ru: `${cyr} — ${ru}`, hint: ru,
+          ...base, id: -(5000 + k), topic: level.title, ug: cyrToArabic(cyr, known), ruShort: cyr, ru: `${cyr} — ${ru}`, hint: ru, audio: phraseAudio(cyr),
         })),
       ];
       return { items, pool: items };
@@ -173,7 +174,7 @@ export function writingItems(level: WritingLevel, course: Course): WritingItems 
         .flatMap((id) => (course.levels.find((l) => l.id === id)?.items ?? []).filter((p) => p.ug.includes(' ')).slice(0, 3))
         .map((p, k): Word => ({
           ...base, id: -(4000 + k), topic: level.title, ug: cyrToArabic(p.ug, known), ruShort: p.ru,
-          ru: `${p.ug} — ${p.ru}`, hint: p.ug, wrong: p.wrong?.map((w) => cyrToArabic(w, known)),
+          ru: `${p.ug} — ${p.ru}`, hint: p.ug, audio: phraseAudio(p.ug), wrong: p.wrong?.map((w) => cyrToArabic(w, known)),
         }));
       return { items, pool: items };
     }

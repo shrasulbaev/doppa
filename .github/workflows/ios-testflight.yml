@@ -1,0 +1,53 @@
+# Собирает iOS-версию на серверах Expo (EAS) и отправляет её в TestFlight.
+# Запуск: вкладка Actions → «iOS TestFlight» → Run workflow.
+#
+# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+#   EXPO_TOKEN        — токен доступа Expo (expo.dev → Account settings → Access tokens)
+#   ASC_API_KEY_P8    — содержимое файла AuthKey_XXXX.p8 из App Store Connect (Users and Access → Integrations → Keys), роль App Manager или Admin
+#   ASC_KEY_ID        — Key ID этого ключа
+#   ASC_ISSUER_ID     — Issuer ID (там же, над списком ключей)
+#   APPLE_TEAM_ID     — Team ID (developer.apple.com → Membership)
+#   ASC_APP_ID        — Apple ID приложения в App Store Connect (App Information → Apple ID, только цифры)
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_ASC_API_KEY_PATH: ${{ github.workspace }}/asc-key.p8
+      ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+      EXPO_ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # COMPANY_OR_ORGANIZATION, если аккаунт разработчика оформлен на компанию (переменная APPLE_TEAM_TYPE)
+      EXPO_APPLE_TEAM_TYPE: ${{ vars.APPLE_TEAM_TYPE || 'INDIVIDUAL' }}
+      # Отправляем на сборку текущие файлы вместе с правками eas.json ниже
+      EAS_NO_VCS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: App Store Connect API key
+        run: printf '%s\n' "${{ secrets.ASC_API_KEY_P8 }}" > asc-key.p8
+      # Привязывает проект к аккаунту Expo, если это ещё не сделано
+      - name: EAS project
+        run: npx eas-cli@latest init --non-interactive --force
+      - name: Build and submit to TestFlight
+        run: |
+          node -e "
+            const fs = require('fs'), e = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
+            e.submit.production.ios = { ascAppId: process.env.ASC_APP_ID, ascApiKeyPath: process.env.EXPO_ASC_API_KEY_PATH,
+              ascApiKeyIssuerId: process.env.EXPO_ASC_ISSUER_ID, ascApiKeyId: process.env.EXPO_ASC_KEY_ID };
+            fs.writeFileSync('eas.json', JSON.stringify(e, null, 2));
+          "
+          npx eas-cli@latest build --platform ios --profile production --non-interactive --auto-submit --wait
+      - if: always()
+        run: rm -f asc-key.p8
