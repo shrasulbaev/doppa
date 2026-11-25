@@ -42,6 +42,11 @@ jobs:
       # Привязывает проект к аккаунту Expo, если это ещё не сделано
       - name: EAS project
         run: npx eas-cli@latest init --non-interactive --force
+      # Сертификат и профиль для App Store EAS создаёт только в интерактивном режиме.
+      # Запускаем его в псевдотерминале и соглашаемся с вариантами по умолчанию; если всё уже есть, команда ничего не меняет.
+      - name: iOS credentials
+        run: |
+          yes '' | timeout 900 script -qefc "npx eas-cli@latest credentials:configure-build --platform ios --profile production" /dev/null
       - name: Build and submit to TestFlight
         run: |
           node -e "
