@@ -1,5 +1,6 @@
 // Сборка и проверка заданий урока. Без React и сети, чтобы легко тестировать.
 import { ARABIC_LETTERS, arabicTiles } from './arabic.ts';
+import { phraseAudio } from './audio.ts';
 import type { Level, Rule, Word } from './types';
 
 export type Step =
@@ -124,7 +125,7 @@ export function phraseParts(ug: string): string[] {
 export function levelPhrases(level: Level): Word[] {
   return (level.items ?? []).map((p, k) => ({
     id: -(k + 1), topic: level.title, ug: p.ug, arabic: null, latin: null, ru: p.ru, ruShort: p.ru,
-    pos: 'фраза', status: 'не проверено', audio: null, group: p.group, wrong: p.wrong,
+    pos: 'фраза', status: 'не проверено', audio: phraseAudio(p.ug), group: p.group, wrong: p.wrong,
   }));
 }
 
