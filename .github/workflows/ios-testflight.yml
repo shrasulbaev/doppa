@@ -1,6 +1,9 @@
 # Собирает iOS-версию на серверах Expo (EAS) и отправляет её в TestFlight.
 # Запуск: вкладка Actions → «iOS TestFlight» → Run workflow или правка файла .github/ios-build (например, новый номер в нём).
 #
+# Сертификат и профиль для App Store уже лежат в EAS (созданы 25.11.2026, действуют до 25.11.2027).
+# Чтобы создать новые: npx eas-cli credentials:configure-build -p ios -e production (в терминале, интерактивно).
+#
 # Нужны секреты репозитория (Settings → Secrets and variables → Actions):
 #   EXPO_TOKEN        — токен доступа Expo (expo.dev → Account settings → Access tokens)
 #   ASC_API_KEY_P8    — содержимое файла AuthKey_XXXX.p8 из App Store Connect (Users and Access → Integrations → Keys), роль App Manager или Admin
@@ -42,11 +45,6 @@ jobs:
       # Привязывает проект к аккаунту Expo, если это ещё не сделано
       - name: EAS project
         run: npx eas-cli@latest init --non-interactive --force
-      # Сертификат и профиль для App Store EAS создаёт только в интерактивном режиме.
-      # Запускаем его в псевдотерминале и соглашаемся с вариантами по умолчанию; если всё уже есть, команда ничего не меняет.
-      - name: iOS credentials
-        run: |
-          yes '' | timeout 900 script -qefc "npx eas-cli@latest credentials:configure-build --platform ios --profile production" /dev/null
       - name: Build and submit to TestFlight
         run: |
           node -e "
